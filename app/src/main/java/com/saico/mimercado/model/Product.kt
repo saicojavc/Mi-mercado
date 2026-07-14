@@ -7,24 +7,62 @@ data class Product(
     val id: String = "",
     val nombre: String = "",
     val categoria: String = "",
-    val imagenUrl: String = ""
+    val emoji: String = ""
 ) {
     companion object {
         val sampleProducts = listOf(
-            Product("1", "Leche Entera", "Lácteos", "https://images.unsplash.com/photo-1563636619-e9107da5a76a?q=80&w=200&auto=format&fit=crop"),
-            Product("2", "Yogurt Natural", "Lácteos", "https://images.unsplash.com/photo-1571212215596-4e56bf3aa9d7?q=80&w=200&auto=format&fit=crop"),
-            Product("3", "Pan Integral", "Panadería", "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop"),
-            Product("4", "Croissant", "Panadería", "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=200&auto=format&fit=crop"),
-            Product("5", "Bistec de Res", "Carnes", "https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=200&auto=format&fit=crop"),
-            Product("6", "Pechuga de Pollo", "Carnes", "https://images.unsplash.com/photo-1604503468506-a8da13d82791?q=80&w=200&auto=format&fit=crop"),
-            Product("7", "Manzana Roja", "Frutas y verduras", "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=200&auto=format&fit=crop"),
-            Product("8", "Plátano", "Frutas y verduras", "https://images.unsplash.com/photo-1571771894821-ad9b5886b45d?q=80&w=200&auto=format&fit=crop"),
-            Product("9", "Arroz Extra", "Despensa", "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop"),
-            Product("10", "Aceite de Oliva", "Despensa", "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=200&auto=format&fit=crop"),
-            Product("11", "Detergente Líquido", "Limpieza", "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?q=80&w=200&auto=format&fit=crop"),
-            Product("12", "Jabón de Platos", "Limpieza", "https://images.unsplash.com/photo-1622060859473-b3c9597b864d?q=80&w=200&auto=format&fit=crop"),
-            Product("13", "Agua Mineral", "Bebidas", "https://images.unsplash.com/photo-1560023907-5f339617ea30?q=80&w=200&auto=format&fit=crop"),
-            Product("14", "Jugo de Naranja", "Bebidas", "https://images.unsplash.com/photo-1613478223719-2ab802602423?q=80&w=200&auto=format&fit=crop")
+            // Lácteos
+            Product("1", "Queso", "Lácteos", "🧀"),
+            Product("2", "Leche", "Lácteos", "🥛"),
+            Product("3", "Yogurt", "Lácteos", "🍦"),
+            Product("4", "Mantequilla", "Lácteos", "🧈"),
+            Product("5", "Huevos", "Lácteos", "🥚"),
+
+            // Panadería
+            Product("6", "Pan", "Panadería", "🍞"),
+            Product("7", "Tortillas", "Panadería", "🫓"),
+            Product("8", "Pan de molde", "Panadería", "🍞"),
+
+            // Carnes
+            Product("9", "Pollo", "Carnes", "🍗"),
+            Product("10", "Carne de res", "Carnes", "🥩"),
+            Product("11", "Carne de cerdo", "Carnes", "🥓"),
+            Product("12", "Jamón", "Carnes", "🍖"),
+            Product("13", "Salchichas", "Carnes", "🌭"),
+
+            // Frutas y verduras
+            Product("14", "Tomate", "Frutas y verduras", "🍅"),
+            Product("15", "Cebolla", "Frutas y verduras", "🧅"),
+            Product("16", "Papa", "Frutas y verduras", "🥔"),
+            Product("17", "Aguacate", "Frutas y verduras", "🥑"),
+            Product("18", "Plátano", "Frutas y verduras", "🍌"),
+            Product("19", "Manzana", "Frutas y verduras", "🍎"),
+            Product("20", "Limón", "Frutas y verduras", "🍋"),
+            Product("21", "Ajo", "Frutas y verduras", "🧄"),
+
+            // Despensa
+            Product("22", "Arroz", "Despensa", "🍚"),
+            Product("23", "Frijoles", "Despensa", "🫘"),
+            Product("24", "Aceite", "Despensa", "🍾"),
+            Product("25", "Azúcar", "Despensa", "🧂"),
+            Product("26", "Sal", "Despensa", "🧂"),
+            Product("27", "Café", "Despensa", "☕"),
+            Product("28", "Harina", "Despensa", "🌾"),
+            Product("29", "Pasta", "Despensa", "🍝"),
+
+            // Limpieza
+            Product("30", "Detergente", "Limpieza", "🧼"),
+            Product("31", "Papel higiénico", "Limpieza", "🧻"),
+            Product("32", "Jabón", "Limpieza", "🧼"),
+            Product("33", "Cloro", "Limpieza", "🧪"),
+            Product("34", "Servilletas", "Limpieza", "🧻"),
+
+            // Bebidas
+            Product("35", "Agua", "Bebidas", "💧"),
+            Product("36", "Refresco", "Bebidas", "🥤"),
+            Product("37", "Jugo", "Bebidas", "🧃"),
+            Product("38", "Cerveza", "Bebidas", "🍺")
         )
     }
+
 }

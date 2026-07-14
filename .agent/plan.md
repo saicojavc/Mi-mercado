@@ -1,37 +1,30 @@
 # Project Plan
 
-Create a simple Android app called "Mi mercado" in Kotlin with Jetpack Compose to manage a real-time shared family shopping list using Firebase Firestore.
-Key Features:
-- Main screen with a hardcoded product catalog.
-- Each product has an image (Coil), name, and a "+" button.
-- Category filter with horizontal FilterChips (All, Dairy, Bakery, Meats, Fruits/Veg, Pantry, Cleaning, Beverages).
-- Adding to cart saves/increments in Firestore: `households/familia_valdes/cart/{itemId}`.
-- Firestore document fields: productId, name, imageUrl, category, quantity, timestamp.
-- Real-time cart view (BottomSheet or Tab) using `addSnapshotListener`.
-- Cart management: delete items (swipe/trash) and clear all.
-- UI/UX: Material3, light/dark theme, rounded cards, cart badge.
-- Architecture: Simple ViewModel with StateFlow, single Activity, no complex layers.
-- Tech Stack: Kotlin, Jetpack Compose, Firebase Firestore BOM, Coil, Material3.
+Migrate "Mi mercado" app from Firebase Firestore to Firebase Realtime Database (RTDB) for cart management.
+Key changes:
+- Update dependencies in `app/build.gradle.kts` to include RTDB.
+- Rewrite `CartViewModel.kt` to use `FirebaseDatabase` and `ValueEventListener`.
+- Maintain the same real-time functionality and UI.
+- Use RTDB path: `households/familia_valdes/cart`.
+
 
 ## Project Brief
 
-# Project Brief: Mi mercado
+# Project Brief: Mi mercado (MVP)
 
 ## Features
-1. **Product Catalog & Categorization**: Browse a visual catalog of products with high-quality images and filter them instantly using Material3 FilterChips (e.g., Dairy, Bakery, Meats, Fruits/Veg).
-2. **Real-time Shared Shopping**: A collaborative cart that synchronizes across all family devices in real-time using Firebase Firestore, allowing members to see updates as they happen.
-3. **Interactive Cart Management**: A dedicated cart view (via BottomSheet or Tab) that allows users to increment quantities, remove items with a swipe, or clear the entire list.
-4. **Adaptive Material3 UI**: A responsive interface built with Material3 components, featuring rounded cards and a dynamic cart badge, designed to adapt seamlessly across different screen sizes.
+1. **Real-time Cart Synchronization**: A collaborative shopping list that updates instantly across all household devices using Firebase Realtime Database.
+2. **Item Management**: Effortlessly add, remove, and update grocery items within the cart.
+3. **Household Scoping**: Dedicated data path (`households/familia_valdes/cart`) ensures items are synced only within the specific family group.
+4. **Reactive UI Updates**: The interface automatically reflects database changes in real-time without manual refreshes.
 
-## High-Level Tech Stack
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose with Material3
-- **Navigation**: Jetpack Navigation 3 (State-driven)
-- **Adaptive Layout**: Compose Material Adaptive Library
-- **Backend/Real-time**: Firebase Firestore (BOM)
-- **Concurrency & State**: Kotlin Coroutines & StateFlow
-- **Image Loading**: Coil
-- **Architecture**: Simple ViewModel-based architecture (Single Activity)
+## High-Level Technical Stack
+- **Kotlin**: Main language for modern, concise Android development.
+- **Jetpack Compose**: Declarative UI toolkit for building the app's interface.
+- **Kotlin Coroutines**: Used for handling asynchronous database listeners and background tasks.
+- **Jetpack Navigation 3**: A state-driven navigation framework for managing app screens and flows.
+- **Compose Material Adaptive**: Ensures the UI scales gracefully across different device form factors.
+- **Firebase Realtime Database (RTDB)**: The core backend service for low-latency, real-time data synchronization.
 
 ## Implementation Steps
 **Total Duration:** 18m 21s
@@ -66,9 +59,6 @@ Key Features:
 ### Task_4_Final_Polish_and_Verify: Refine the UI with Material3 Light/Dark theme support and adaptive layout adjustments. Perform a final run and verify application stability (no crashes). Confirm alignment with all user requirements.
 - **Status:** COMPLETED
 - **Updates:** Refined UI with Material3 Light/Dark themes and dynamic colors.
-Implemented comprehensive Firestore error handling and user feedback (Toasts).
-Verified that the app is stable and UI components are functional.
-Note: Users must configure Firestore rules (e.g., allow read, write: if true) in their Firebase Console to enable real-time features.
 - **Acceptance Criteria:**
   - App does not crash
   - Build pass

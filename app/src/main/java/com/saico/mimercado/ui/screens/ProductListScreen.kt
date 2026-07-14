@@ -1,6 +1,10 @@
 package com.saico.mimercado.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,18 +28,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.saico.mimercado.R
 import com.saico.mimercado.ui.components.CategoryFilter
 import com.saico.mimercado.ui.components.ProductRow
+import com.saico.mimercado.ui.theme.AppBackground
 import com.saico.mimercado.ui.theme.MiMercadoTheme
+import com.saico.mimercado.ui.theme.TextDark
 import com.saico.mimercado.ui.viewmodel.CartViewModel
 import com.saico.mimercado.ui.viewmodel.SimpleProductListViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -56,6 +66,17 @@ fun ProductListScreen(
 
     val context = LocalContext.current
 
+    var previousTotalItems by remember { mutableIntStateOf(totalItems) }
+    val badgeScale = remember { Animatable(1f) }
+
+    LaunchedEffect(totalItems) {
+        if (totalItems > previousTotalItems) {
+            badgeScale.animateTo(1.5f, animationSpec = tween(100))
+            badgeScale.animateTo(1f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        }
+        previousTotalItems = totalItems
+    }
+
     LaunchedEffect(cartViewModel.errorMessages) {
         cartViewModel.errorMessages.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -67,12 +88,18 @@ fun ProductListScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = AppBackground,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = { 
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AppBackground,
+                    titleContentColor = TextDark
                 )
             )
         },
@@ -86,6 +113,7 @@ fun ProductListScreen(
                     badge = {
                         if (totalItems > 0) {
                             Badge(
+                                modifier = Modifier.scale(badgeScale.value),
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             ) {

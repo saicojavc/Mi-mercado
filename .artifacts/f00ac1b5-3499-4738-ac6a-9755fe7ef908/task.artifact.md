@@ -1,0 +1,9 @@
+- [x] Add Firebase Realtime Database dependency
+- [x] Replace `FirebaseFirestore` with `FirebaseDatabase` in `CartViewModel.kt`
+- [x] Update `addToCart` logic (Verified as already using Realtime Database)
+- [x] Update `removeFromCart` logic (Verified as already using Realtime Database)
+- [x] Update `clearCart` logic (Verified as already using Realtime Database)
+- [x] Verify build and functionality
+- [x] Remove unused `firebase-firestore` dependency from `app/build.gradle.kts`
+- [x] Remove `firebase-firestore` from `libs.versions.toml`
+- [x] Verify project compiles successfully

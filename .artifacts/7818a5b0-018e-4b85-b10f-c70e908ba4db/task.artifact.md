@@ -4,4 +4,5 @@
 - [x] Create `ProductListViewModel.kt`
 - [x] Create `ProductListScreen.kt`
 - [x] Update `MainActivity.kt`
+- [x] Migrate `CartViewModel.kt` to Firebase Realtime Database
 - [x] Verify build

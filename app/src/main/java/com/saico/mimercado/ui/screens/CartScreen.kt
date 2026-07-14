@@ -1,9 +1,12 @@
 package com.saico.mimercado.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -14,14 +17,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.saico.mimercado.model.CartItem
-import com.saico.mimercado.ui.viewmodel.CartViewModel
-
-import androidx.compose.ui.res.stringResource
 import com.saico.mimercado.R
+import com.saico.mimercado.model.CartItem
+import com.saico.mimercado.ui.theme.AppBackground
+import com.saico.mimercado.ui.theme.ErrorRed
+import com.saico.mimercado.ui.theme.PrimaryCyan
+import com.saico.mimercado.ui.viewmodel.CartViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -41,6 +48,7 @@ fun CartScreen(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .background(AppBackground)
             .padding(24.dp)
     ) {
         Row(
@@ -57,7 +65,7 @@ fun CartScreen(
                 TextButton(onClick = { viewModel.clearCart() }) {
                     Text(
                         text = stringResource(R.string.clear_cart),
-                        color = MaterialTheme.colorScheme.error,
+                        color = PrimaryCyan,
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -103,10 +111,11 @@ fun CartItemRow(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -114,6 +123,19 @@ fun CartItemRow(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = item.emoji,
+                        fontSize = 24.sp
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.nombre,
@@ -130,7 +152,7 @@ fun CartItemRow(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = stringResource(R.string.remove_from_cart),
-                    tint = MaterialTheme.colorScheme.error
+                    tint = ErrorRed
                 )
             }
         }

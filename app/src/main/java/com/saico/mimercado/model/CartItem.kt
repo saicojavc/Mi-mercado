@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CartItem(
-    val productId: String = "",
-    val nombre: String = "",
-    val imagenUrl: String = "",
-    val categoria: String = "",
-    val cantidad: Int = 0,
-    val timestamp: Long = System.currentTimeMillis()
+    var productId: String = "",
+    var nombre: String = "",
+    var emoji: String = "",
+    var categoria: String = "",
+    var cantidad: Int = 0,
+    var timestamp: Long = System.currentTimeMillis()
 )

@@ -2,10 +2,10 @@ package com.saico.mimercado.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryGreen = Color(0xFF00C853)
-val SecondaryAmber = Color(0xFFFFD600)
-val TertiaryBlue = Color(0xFF00B0FF)
-
-val PrimaryGreenDark = Color(0xFF009624)
-val SecondaryAmberDark = Color(0xFFFFAB00)
-val TertiaryBlueDark = Color(0xFF0081CB)
+val AppBackground = Color(0xFFFAFBFC)
+val PrimaryCyan = Color(0xFF00D9FF)
+val SecondaryTeal = Color(0xFF06B6D4)
+val TextDark = Color(0xFF0F172A)
+val NeutralLight = Color(0xFFE2E8F0)
+val SuccessGreen = Color(0xFF10B981)
+val ErrorRed = Color(0xFFEF4444)
