@@ -9,5 +9,6 @@ data class CartItem(
     var emoji: String = "",
     var categoria: String = "",
     var cantidad: Int = 0,
-    var timestamp: Long = System.currentTimeMillis()
+    var timestamp: Long = System.currentTimeMillis(),
+    var addedBy: String = ""
 )

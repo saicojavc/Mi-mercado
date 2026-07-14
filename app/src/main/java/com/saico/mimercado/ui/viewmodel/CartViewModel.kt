@@ -1,7 +1,8 @@
 package com.saico.mimercado.ui.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -11,6 +12,7 @@ import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 import com.saico.mimercado.model.CartItem
 import com.saico.mimercado.model.Product
+import com.saico.mimercado.util.SharedPreferencesUtil
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,7 +23,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "CartViewModel"
 
-class CartViewModel : ViewModel() {
+class CartViewModel(application: Application) : AndroidViewModel(application) {
     private val database = FirebaseDatabase.getInstance("https://when-babe-default-rtdb.firebaseio.com/")
     private val cartRef = database.getReference("households/familia_valdes/cart")
 
@@ -54,7 +56,8 @@ class CartViewModel : ViewModel() {
     }
 
     fun addToCart(product: Product) {
-        Log.d(TAG, "addToCart: Attempting to add product ${product.nombre} (${product.id})")
+        val userId = SharedPreferencesUtil.getUserId(getApplication())
+        Log.d(TAG, "addToCart: Attempting to add product ${product.nombre} (${product.id}) by $userId")
         cartRef.child(product.id).runTransaction(object : Transaction.Handler {
             override fun doTransaction(mutableData: MutableData): Transaction.Result {
                 Log.d(TAG, "doTransaction: Current data is ${mutableData.value}")
@@ -67,13 +70,15 @@ class CartViewModel : ViewModel() {
                         emoji = product.emoji,
                         categoria = product.categoria,
                         cantidad = 1,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = System.currentTimeMillis(),
+                        addedBy = userId
                     )
                 } else {
                     Log.d(TAG, "doTransaction: Incrementing existing item quantity")
                     cartItem = cartItem.copy(
                         cantidad = cartItem.cantidad + 1,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = System.currentTimeMillis(),
+                        addedBy = userId
                     )
                 }
                 mutableData.setValue(cartItem)
