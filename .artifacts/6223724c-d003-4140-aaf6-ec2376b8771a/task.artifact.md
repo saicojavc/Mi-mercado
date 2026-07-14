@@ -1,0 +1,7 @@
+- [x] Implement error handling in `CartViewModel`
+    - [x] Add `errorMessages` SharedFlow
+    - [x] Wrap Firestore calls in try-catch/failure listeners
+    - [x] Add explicit logging
+- [x] Implement UI feedback in `CartScreen`
+- [x] Implement UI feedback in `ProductListScreen`
+- [x] Verify build

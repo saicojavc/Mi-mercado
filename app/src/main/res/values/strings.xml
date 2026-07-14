@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Mi mercado</string>
+    <string name="cart_title">Tu Carrito</string>
+    <string name="clear_cart">Vaciar Carrito</string>
+    <string name="empty_cart">Tu carrito está vacío</string>
+    <string name="item_quantity">Cantidad: %1$d</string>
+    <string name="remove_from_cart">Eliminar del carrito</string>
+    <string name="add_to_cart">Agregar al carrito</string>
+    <string name="view_cart">Ver carrito</string>
+</resources>

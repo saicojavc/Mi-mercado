@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.MiMercado" parent="Theme.MaterialComponents.Light" />
+</resources>

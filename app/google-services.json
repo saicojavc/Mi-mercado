@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "468440647882",
+    "project_id": "com-saico-mimercado-e7ca2",
+    "storage_bucket": "com-saico-mimercado-e7ca2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468440647882:android:2e8ac27f1d56d395670c33",
+        "android_client_info": {
+          "package_name": "com.saico.mimercado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkOIM5QeNIMjxwKXrwRdn3IP76IkWEtSk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

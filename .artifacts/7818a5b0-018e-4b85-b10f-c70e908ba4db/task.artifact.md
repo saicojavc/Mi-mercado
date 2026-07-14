@@ -1,0 +1,7 @@
+- [x] Add hardcoded products to `Product.kt`
+- [x] Create `CategoryFilter.kt`
+- [x] Create `ProductRow.kt`
+- [x] Create `ProductListViewModel.kt`
+- [x] Create `ProductListScreen.kt`
+- [x] Update `MainActivity.kt`
+- [x] Verify build
