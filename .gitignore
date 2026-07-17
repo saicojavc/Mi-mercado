@@ -15,3 +15,7 @@
 local.properties
 firebase.json
 .firebaserc
+.env
+implementation_plan.artifact.md
+task.artifact.md
+walkthrough.artifact.md

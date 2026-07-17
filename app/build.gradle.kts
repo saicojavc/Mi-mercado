@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -10,6 +12,13 @@ android {
     namespace = "com.saico.mimercado"
     compileSdk = 37
 
+    val envFile = rootProject.file(".env")
+    val properties = Properties()
+    if (envFile.exists()) {
+        properties.load(envFile.inputStream())
+    }
+    val dbUrl = properties.getProperty("FIREBASE_DATABASE_URL") ?: ""
+
     defaultConfig {
         applicationId = "com.saico.mimercado"
         minSdk = 24
@@ -18,6 +27,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "DATABASE_URL", "\"$dbUrl\"")
     }
 
     buildTypes {
@@ -33,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -66,8 +77,17 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.database)
+// Firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-firestore")
+
+    // AndroidX
+    implementation("androidx.core:core:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+//    implementation(libs.firebase.firestore)
+//    implementation(libs.firebase.messaging)
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.coil.compose)
     implementation(libs.converter.moshi)
     implementation(libs.kotlinx.coroutines.android)

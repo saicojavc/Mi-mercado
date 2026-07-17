@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CartItem(
-    var productId: String = "",
+    var itemId: String = "",
     var nombre: String = "",
     var emoji: String = "",
     var categoria: String = "",

@@ -44,6 +44,7 @@ datastorePreferences = "1.1.7"
 material = "1.13.0"
 firebaseBom = "34.16.0"
 googleServices = "4.5.0"
+activityKtx = "1.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -97,8 +98,9 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-firebase-database = { group = "com.google.firebase", name = "firebase-database" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

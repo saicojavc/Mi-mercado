@@ -10,7 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.saico.mimercado.ui.screens.ProductListScreen
 import com.saico.mimercado.ui.theme.MiMercadoTheme
@@ -27,9 +27,9 @@ class MainActivity : ComponentActivity() {
                 ActivityResultContracts.RequestPermission()
             ) { isGranted: Boolean ->
                 if (isGranted) {
-                    Log.d("MainActivity", "Notification permission granted")
+                    Log.d("MainActivity", "✅ Notification permission granted")
                 } else {
-                    Log.w("MainActivity", "Notification permission denied")
+                    Log.w("MainActivity", "❌ Notification permission denied")
                 }
             }
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -39,24 +39,25 @@ class MainActivity : ComponentActivity() {
 
         // Initialize device token registration on startup
         val userId = SharedPreferencesUtil.getUserId(this)
-        val database = FirebaseDatabase.getInstance("https://when-babe-default-rtdb.firebaseio.com/")
-        val userRef = database.getReference("households/familia_valdes/users/$userId")
+        val firestore = FirebaseFirestore.getInstance()
+        val userRef = firestore.collection("households").document("familia_valdes")
+            .collection("users").document(userId)
         
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
                 val username = "Usuario " + userId.takeLast(4)
-                userRef.setValue(mapOf(
+                userRef.set(mapOf(
                     "deviceToken" to token,
                     "lastSeen" to System.currentTimeMillis(),
                     "username" to username
                 )).addOnSuccessListener {
-                    Log.d("MainActivity", "User registration and device token updated successfully on startup")
+                    Log.d("MainActivity", "✅ User registration and device token updated successfully on Firestore")
                 }.addOnFailureListener { e ->
-                    Log.e("MainActivity", "Failed to update user registration on startup", e)
+                    Log.e("MainActivity", "❌ Failed to update user registration on Firestore", e)
                 }
             } else {
-                Log.e("MainActivity", "Failed to retrieve FCM token on startup", task.exception)
+                Log.e("MainActivity", "❌ Failed to retrieve FCM token on startup", task.exception)
             }
         }
 
@@ -67,4 +68,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

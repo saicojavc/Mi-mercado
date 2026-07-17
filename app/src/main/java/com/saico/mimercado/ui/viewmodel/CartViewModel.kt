@@ -4,12 +4,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.MutableData
-import com.google.firebase.database.Transaction
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.saico.mimercado.model.CartItem
 import com.saico.mimercado.model.Product
 import com.saico.mimercado.util.SharedPreferencesUtil
@@ -24,8 +20,10 @@ import kotlinx.coroutines.launch
 private const val TAG = "CartViewModel"
 
 class CartViewModel(application: Application) : AndroidViewModel(application) {
-    private val database = FirebaseDatabase.getInstance("https://when-babe-default-rtdb.firebaseio.com/")
-    private val cartRef = database.getReference("households/familia_valdes/cart")
+    private val firestore = FirebaseFirestore.getInstance()
+    private val cartCollection = firestore.collection("households")
+        .document("familia_valdes")
+        .collection("cart")
 
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
@@ -33,39 +31,65 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     private val _errorMessages = MutableSharedFlow<String>()
     val errorMessages: SharedFlow<String> = _errorMessages.asSharedFlow()
 
+    private var cartListener: ListenerRegistration? = null
+
     init {
-        Log.d(TAG, "Initializing CartViewModel with URL: https://when-babe-default-rtdb.firebaseio.com/")
-        cartRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d(TAG, "onDataChange: Received snapshot with ${snapshot.childrenCount} children")
-                val items = snapshot.children.mapNotNull { 
-                    val item = it.getValue(CartItem::class.java)
-                    Log.d(TAG, "Parsed item: $item")
-                    item
+        listenToCartChanges()
+    }
+
+    private fun listenToCartChanges() {
+        Log.d(TAG, "✅ Initializing CartViewModel with Firestore listener")
+        cartListener = cartCollection.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e(TAG, "❌ Error listening to cart updates: ${e.message}", e)
+                viewModelScope.launch {
+                    _errorMessages.emit("Error de conexión: ${e.message}")
+                }
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                Log.d(TAG, "✅ onEvent: Received snapshot with ${snapshot.size()} documents")
+                val items = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(CartItem::class.java)?.apply {
+                        itemId = doc.id
+                    }
                 }
                 _cartItems.value = items
             }
+        }
+    }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "Error listening to cart updates: ${error.message}", error.toException())
-                viewModelScope.launch {
-                    _errorMessages.emit("Error de conexión: ${error.message}")
-                }
-            }
-        })
+    override fun onCleared() {
+        super.onCleared()
+        cartListener?.remove()
     }
 
     fun addToCart(product: Product) {
         val userId = SharedPreferencesUtil.getUserId(getApplication())
-        Log.d(TAG, "addToCart: Attempting to add product ${product.nombre} (${product.id}) by $userId")
-        cartRef.child(product.id).runTransaction(object : Transaction.Handler {
-            override fun doTransaction(mutableData: MutableData): Transaction.Result {
-                Log.d(TAG, "doTransaction: Current data is ${mutableData.value}")
-                var cartItem = mutableData.getValue(CartItem::class.java)
-                if (cartItem == null) {
-                    Log.d(TAG, "doTransaction: Creating new cart item")
-                    cartItem = CartItem(
-                        productId = product.id,
+        Log.d(TAG, "🔍 addToCart START: ${product.nombre} by $userId")
+
+        // Buscamos ítems del usuario actual que empiecen con el ID del producto
+        val productIdPrefix = "${product.id}_"
+        
+        cartCollection
+            .whereEqualTo("addedBy", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                // Filtramos localmente por el prefijo del itemId (documentId)
+                val existingDoc = snapshot.documents.find { it.id.startsWith(productIdPrefix) }
+                
+                if (existingDoc != null) {
+                    Log.d(TAG, "✅ Product already exists for this user (matched by prefix), incrementing quantity")
+                    incrementQuantity(existingDoc.id)
+                    viewModelScope.launch {
+                        _errorMessages.emit("${product.nombre} actualizado en el carrito")
+                    }
+                } else {
+                    Log.d(TAG, "✅ New product for this user, creating unique itemId")
+                    val newItemId = "${product.id}_${System.currentTimeMillis()}"
+                    val cartItem = CartItem(
+                        itemId = newItemId,
                         nombre = product.nombre,
                         emoji = product.emoji,
                         categoria = product.categoria,
@@ -73,46 +97,74 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
                         timestamp = System.currentTimeMillis(),
                         addedBy = userId
                     )
-                } else {
-                    Log.d(TAG, "doTransaction: Incrementing existing item quantity")
-                    cartItem = cartItem.copy(
-                        cantidad = cartItem.cantidad + 1,
-                        timestamp = System.currentTimeMillis(),
-                        addedBy = userId
-                    )
+                    cartCollection.document(newItemId).set(cartItem)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "✅ New CartItem created: $newItemId")
+                            viewModelScope.launch {
+                                _errorMessages.emit("${product.nombre} agregado al carrito")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "❌ Error creating CartItem", e)
+                            viewModelScope.launch {
+                                _errorMessages.emit("Error al agregar al carrito: ${e.message}")
+                            }
+                        }
                 }
-                mutableData.setValue(cartItem)
-                return Transaction.success(mutableData)
             }
-
-            override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+            .addOnFailureListener { e ->
+                Log.e(TAG, "❌ Error checking existing product", e)
                 viewModelScope.launch {
-                    if (error != null) {
-                        Log.e(TAG, "Error adding product to cart", error.toException())
-                        _errorMessages.emit("Error al agregar al carrito: ${error.message}")
-                    } else if (!committed) {
-                        Log.w(TAG, "Transaction not committed")
-                        _errorMessages.emit("La operación no se pudo completar. Inténtalo de nuevo.")
-                    } else {
-                        Log.d(TAG, "Product added to cart successfully")
-                        _errorMessages.emit("${product.nombre} agregado al carrito")
-                    }
+                    _errorMessages.emit("Error al buscar producto: ${e.message}")
                 }
             }
-        })
+    }
+
+    fun incrementQuantity(itemId: String) {
+        Log.d(TAG, "✅ incrementQuantity: Incrementing item $itemId")
+        val ref = cartCollection.document(itemId)
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(ref)
+            val currentQty = snapshot.getLong("cantidad") ?: 0L
+            transaction.update(ref, "cantidad", currentQty + 1)
+            transaction.update(ref, "timestamp", System.currentTimeMillis())
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "❌ Error incrementing quantity", e)
+        }
+    }
+
+    fun decrementQuantity(itemId: String) {
+        Log.d(TAG, "✅ decrementQuantity: Decrementing item $itemId")
+        val ref = cartCollection.document(itemId)
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(ref)
+            val currentQty = snapshot.getLong("cantidad") ?: 1L
+            if (currentQty > 1) {
+                transaction.update(ref, "cantidad", currentQty - 1)
+                transaction.update(ref, "timestamp", System.currentTimeMillis())
+            } else {
+                transaction.delete(ref)
+            }
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "❌ Error decrementing quantity", e)
+        }
     }
 
     fun removeFromCart(cartItem: CartItem) {
-        Log.d(TAG, "removeFromCart: Attempting to remove item ${cartItem.nombre}")
-        cartRef.child(cartItem.productId).removeValue()
+        Log.d(TAG, "✅ removeFromCart: Removing item ${cartItem.nombre}")
+        if (cartItem.itemId.isEmpty()) {
+            Log.e(TAG, "❌ Cannot remove item: itemId is empty")
+            return
+        }
+        cartCollection.document(cartItem.itemId).delete()
             .addOnSuccessListener {
-                Log.d(TAG, "Item removed from cart successfully")
+                Log.d(TAG, "✅ Item removed from cart successfully")
                 viewModelScope.launch {
                     _errorMessages.emit("${cartItem.nombre} eliminado del carrito")
                 }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Error removing item from cart", e)
+                Log.e(TAG, "❌ Error removing item from cart", e)
                 viewModelScope.launch {
                     _errorMessages.emit("Error al eliminar del carrito: ${e.localizedMessage}")
                 }
@@ -120,19 +172,27 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearCart() {
-        Log.d(TAG, "clearCart: Attempting to clear entire cart")
-        cartRef.removeValue()
-            .addOnSuccessListener {
-                Log.d(TAG, "Cart cleared successfully")
+        Log.d(TAG, "✅ clearCart: Clearing entire cart")
+        cartCollection.get().addOnSuccessListener { snapshot ->
+            if (snapshot.isEmpty) return@addOnSuccessListener
+            
+            val batch = firestore.batch()
+            for (doc in snapshot.documents) {
+                batch.delete(doc.reference)
+            }
+            batch.commit().addOnSuccessListener {
+                Log.d(TAG, "✅ Cart cleared successfully")
                 viewModelScope.launch {
                     _errorMessages.emit("Carrito vaciado")
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error clearing cart", e)
+            }.addOnFailureListener { e ->
+                Log.e(TAG, "❌ Error clearing cart batch", e)
                 viewModelScope.launch {
                     _errorMessages.emit("Error al vaciar el carrito: ${e.localizedMessage}")
                 }
             }
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "❌ Error fetching cart for clearing", e)
+        }
     }
 }
