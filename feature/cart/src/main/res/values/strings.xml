@@ -1,0 +1,7 @@
+<resources>
+    <string name="cart_title">Tu Carrito</string>
+    <string name="clear_cart">Vaciar</string>
+    <string name="empty_cart">No hay productos en el carrito</string>
+    <string name="item_quantity">Cantidad: %1$d</string>
+    <string name="remove_from_cart">Eliminar del carrito</string>
+</resources>

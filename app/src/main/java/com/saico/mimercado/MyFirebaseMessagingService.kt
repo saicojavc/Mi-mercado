@@ -14,9 +14,14 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.saico.mimercado.util.SharedPreferencesUtil
+import com.saico.mimercado.core.common.UserProvider
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+    @Inject lateinit var userProvider: UserProvider
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
@@ -41,7 +46,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendTokenToServer(token: String) {
-        val userId = SharedPreferencesUtil.getUserId(applicationContext)
+        val userId = userProvider.getUserId()
         val firestore = FirebaseFirestore.getInstance()
 
         Log.d("FCMService", "🔍 sendTokenToServer START")

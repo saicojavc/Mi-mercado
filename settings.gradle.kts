@@ -24,3 +24,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "Mi mercado"
 include(":app")
+include(":core:ui")
+include(":core:common")
+include(":core:model")
+include(":core:domain")
+include(":core:data")
+include(":core:network")
+include(":core:database")
+include(":core:datastore")
+include(":feature:products")
+include(":feature:cart")

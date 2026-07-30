@@ -9,15 +9,41 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
-import com.saico.mimercado.ui.screens.ProductListScreen
-import com.saico.mimercado.ui.theme.MiMercadoTheme
-import com.saico.mimercado.util.SharedPreferencesUtil
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
+import com.saico.mimercado.core.ui.navigation.Navigator
+import com.saico.mimercado.core.ui.navigation.NavigatorHandler
+import com.saico.mimercado.core.ui.navigation.routes.Route
+import com.saico.mimercado.core.ui.theme.MiMercadoTheme
+import com.saico.mimercado.feature.cart.CartViewModel
+import com.saico.mimercado.feature.cart.navigation.cartGraph
+import com.saico.mimercado.feature.products.navigation.productsGraph
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
+    @Inject lateinit var navigator: Navigator
+    @Inject lateinit var fcmManager: FCMRegistrationManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -38,33 +64,45 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize device token registration on startup
-        val userId = SharedPreferencesUtil.getUserId(this)
-        val firestore = FirebaseFirestore.getInstance()
-        val userRef = firestore.collection("households").document("familia_valdes")
-            .collection("users").document(userId)
-        
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val token = task.result
-                val username = "Usuario " + userId.takeLast(4)
-                userRef.set(mapOf(
-                    "deviceToken" to token,
-                    "lastSeen" to System.currentTimeMillis(),
-                    "username" to username
-                )).addOnSuccessListener {
-                    Log.d("MainActivity", "✅ User registration and device token updated successfully on Firestore")
-                }.addOnFailureListener { e ->
-                    Log.e("MainActivity", "❌ Failed to update user registration on Firestore", e)
-                }
-            } else {
-                Log.e("MainActivity", "❌ Failed to retrieve FCM token on startup", task.exception)
-            }
-        }
+        fcmManager.registerDeviceToken()
 
         setContent {
-            MiMercadoTheme {
-                ProductListScreen()
+            MiMercadoTheme(darkTheme = viewModel.isDarkMode.value) {
+                val navController = rememberNavController()
+                NavigatorHandler(navigator = navigator, navController = navController)
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainContainer(
+                        navController = navController,
+                        startDestination = viewModel.firstScreen
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun MainContainer(
+    navController: NavHostController,
+    startDestination: Route
+) {
+    val cartViewModel: CartViewModel = hiltViewModel()
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val totalItems = cartItems.sumOf { it.cantidad }
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        productsGraph(
+            totalCartItems = totalItems,
+            errorMessages = cartViewModel.errorMessages,
+            onAddToCart = { cartViewModel.addToCart(it) }
+        )
+        cartGraph()
     }
 }
