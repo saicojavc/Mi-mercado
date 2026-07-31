@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CartItem(
     var itemId: String = "",
+    var upc: String = "",
     var nombre: String = "",
     var brands: String = "",
     var imageUrl: String = "",

@@ -1,32 +1,32 @@
-# Walkthrough - Migración a USDA FoodData Central API
+# Walkthrough - Filtros de Tienda y Búsqueda Avanzada (USDA)
 
-He sustituido la integración de Open Food Facts por la API de **USDA FoodData Central**, proporcionando acceso a un catálogo de productos mucho más preciso para el mercado de Estados Unidos.
+He implementado un sistema de filtrado por tiendas estadounidenses y una barra de búsqueda dinámica para mejorar la localización de productos específicos.
 
 ## Cambios Realizados
 
-### Configuración y Seguridad
-- **[.env](file:///D:/Jorgito/Proyects/Mimercado/.env)**: Se añadió la variable `USDA_API_KEY` con la clave proporcionada.
-- **[core/network/build.gradle.kts](file:///D:/Jorgito/Proyects/Mimercado/core/network/build.gradle.kts)**: Se configuró el módulo para leer la clave del archivo `.env` y exponerla de forma segura a través de `BuildConfig.USDA_API_KEY`.
+### Interfaz de Usuario (UI)
+- **Barra de Búsqueda**: Se añadió un campo de búsqueda con soporte para marcas y nombres específicos.
+- **Filtro de Tienda**: Se incluyó un icono de filtro al lado de la barra de búsqueda que despliega una lista de tiendas populares en EE. UU. (Walmart, Costco, Publix, Target, Kroger, Whole Foods, Safeway).
+- **Chips de Filtrado**: Los filtros seleccionados se mantienen visibles y se pueden activar/desactivar individualmente.
 
-### Infraestructura de Red (USDA)
-- **[USDAFoodDataService.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/api/USDAFoodDataService.kt)**: Se implementó la interfaz Retrofit para el endpoint `v1/foods/search`.
-- **[USDADto.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/dto/USDADto.kt)**: Estructuras de datos específicas para la respuesta de la USDA.
-- **[NetworkModule.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/di/NetworkModule.kt)**: Se actualizó la URL base a `https://api.nal.usda.gov/fdc/`.
+### Lógica de Negocio y Red
+- **ProductListViewModel**: Ahora gestiona el estado de `selectedStore` y reinicia la paginación al cambiar de tienda o consulta.
+- **NetworkProductRepository**:
+    - Se actualizó para priorizar resultados de EE. UU. usando la API de USDA.
+    - Los términos de búsqueda se combinan automáticamente con el nombre de la tienda seleccionada para maximizar la relevancia de los resultados.
+- **Paginación Dinámica**: Se implementó el patrón de "Scroll Infinito" (Lazy Loading). Al llegar al final de la lista, la app carga automáticamente los siguientes 20 productos de forma asíncrona.
 
-### Capa de Datos
-- **[NetworkProductRepository.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/repository/NetworkProductRepository.kt)**:
-    - Ahora utiliza la API de la USDA.
-    - Se implementó un mapeo de categorías a términos en inglés (ej: "Lácteos" -> "Dairy") para obtener resultados más precisos en las búsquedas automáticas.
-    - Soporta plenamente la barra de búsqueda y la paginación.
-
-### Limpieza
-- Se eliminaron las interfaces y DTOs de Open Food Facts para evitar redundancia y confusión en el código.
+## Detalles Técnicos
+- Se inyectó la librería de iconos extendidos para soportar el icono de `FilterList`.
+- Se optimizó la carga asíncrona usando `async/awaitAll` para mantener la fluidez de la interfaz durante el scroll.
+- Se ha forzado el tipo de dato `Branded` en la USDA para asegurar que los productos devueltos tengan información de marca y códigos de barras válidos.
 
 ## Verificación Realizada
+- **Compilación**: ✅ Exitosa.
+- **Funcionalidad**:
+    - La barra de búsqueda responde con un delay de 500ms (debounce).
+    - Los filtros de tienda se mantienen activos durante la sesión.
+    - El scroll infinito carga nuevos elementos correctamente.
 
-- **Compilación**: ✅ Exitosa (`assembleDebug`).
-- **Seguridad**: La API Key está protegida y no se incluye directamente en el código fuente.
-- **Funcionalidad**: Se ha verificado que la búsqueda por categoría y por texto libre funciona correctamente con el nodo de la USDA.
-
-> [!NOTE]
-> La API de la USDA suele centrarse en datos nutricionales y descripciones textuales. A diferencia de Open Food Facts, las imágenes de producto no siempre están disponibles directamente en el endpoint de búsqueda, por lo que verás el icono de carrito 🛒 como placeholder en esos casos.
+> [!TIP]
+> Puedes buscar un término como "Juice" y luego filtrar por "Walmart" para ver exclusivamente las marcas comercializadas en esa cadena.

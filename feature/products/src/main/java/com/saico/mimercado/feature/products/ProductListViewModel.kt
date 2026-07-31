@@ -22,9 +22,13 @@ class ProductListViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ) : ViewModel() {
     val categories = listOf("Todos", "Lácteos", "Panadería", "Carnes", "Frutas y verduras", "Despensa", "Limpieza", "Bebidas")
+    val stores = listOf("Walmart", "Costco", "Publix", "Target", "Kroger", "BJ's", "Fresco y Más", "Martins", "Whole Foods", "Safeway", "ALDI")
     
     private val _selectedCategory = MutableStateFlow("Todos")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
+
+    private val _selectedStore = MutableStateFlow<String?>(null)
+    val selectedStore: StateFlow<String?> = _selectedStore.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -61,6 +65,11 @@ class ProductListViewModel @Inject constructor(
         loadProducts(reset = true)
     }
 
+    fun onStoreSelected(store: String?) {
+        _selectedStore.value = if (_selectedStore.value == store) null else store
+        loadProducts(reset = true)
+    }
+
     fun loadNextPage() {
         if (_isLoading.value || _isPaginating.value || isLastPage) return
         loadProducts(reset = false)
@@ -78,6 +87,7 @@ class ProductListViewModel @Inject constructor(
             val result = productRepository.getProducts(
                 category = if (_selectedCategory.value == "Todos") null else _selectedCategory.value,
                 searchQuery = if (_searchQuery.value.isBlank()) null else _searchQuery.value,
+                store = _selectedStore.value,
                 page = currentPage
             )
 

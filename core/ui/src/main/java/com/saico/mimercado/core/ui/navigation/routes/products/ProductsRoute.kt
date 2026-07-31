@@ -7,3 +7,8 @@ import kotlinx.serialization.Serializable
 data object ProductsRoute : Route {
     override val route: String = "products"
 }
+
+@Serializable
+data class ProductDetailsRoute(val fdcId: String) : Route {
+    override val route: String = "product_details/$fdcId"
+}

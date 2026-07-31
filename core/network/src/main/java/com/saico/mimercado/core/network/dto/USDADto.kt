@@ -17,7 +17,35 @@ data class USDAFoodDto(
     @Json(name = "description") val description: String,
     @Json(name = "brandOwner") val brandOwner: String? = null,
     @Json(name = "gtinUpc") val gtinUpc: String? = null,
-    @Json(name = "publishedDate") val publishedDate: String? = null,
-    @Json(name = "foodCategory") val foodCategory: String? = null,
-    @Json(name = "image") val image: String? = null // USDA API usually doesn't provide images directly in search, might need another way or placeholder
+    @Json(name = "foodCategory") val foodCategory: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class USDAFoodDetailsDto(
+    @Json(name = "fdcId") val fdcId: Int,
+    @Json(name = "description") val description: String,
+    @Json(name = "brandOwner") val brandOwner: String? = null,
+    @Json(name = "gtinUpc") val gtinUpc: String? = null,
+    @Json(name = "ingredients") val ingredients: String? = null,
+    @Json(name = "labelNutrients") val labelNutrients: USDALabelNutrientsDto? = null,
+    @Json(name = "foodCategory") val foodCategory: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class USDALabelNutrientsDto(
+    @Json(name = "fat") val fat: USDANutrientValueDto? = null,
+    @Json(name = "saturatedFat") val saturatedFat: USDANutrientValueDto? = null,
+    @Json(name = "transFat") val transFat: USDANutrientValueDto? = null,
+    @Json(name = "cholesterol") val cholesterol: USDANutrientValueDto? = null,
+    @Json(name = "sodium") val sodium: USDANutrientValueDto? = null,
+    @Json(name = "carbohydrates") val carbohydrates: USDANutrientValueDto? = null,
+    @Json(name = "fiber") val fiber: USDANutrientValueDto? = null,
+    @Json(name = "sugars") val sugars: USDANutrientValueDto? = null,
+    @Json(name = "protein") val protein: USDANutrientValueDto? = null,
+    @Json(name = "calories") val calories: USDANutrientValueDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class USDANutrientValueDto(
+    @Json(name = "value") val value: Double = 0.0
 )

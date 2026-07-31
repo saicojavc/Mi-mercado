@@ -77,7 +77,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainContainer(
                         navController = navController,
-                        startDestination = viewModel.firstScreen
+                        startDestination = viewModel.firstScreen,
+                        navigator = navigator
                     )
                 }
             }
@@ -88,7 +89,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainContainer(
     navController: NavHostController,
-    startDestination: Route
+    startDestination: Route,
+    navigator: Navigator
 ) {
     val cartViewModel: CartViewModel = hiltViewModel()
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -101,7 +103,8 @@ private fun MainContainer(
         productsGraph(
             totalCartItems = totalItems,
             errorMessages = cartViewModel.errorMessages,
-            onAddToCart = { cartViewModel.addToCart(it) }
+            onAddToCart = { cartViewModel.addToCart(it) },
+            navigator = navigator
         )
         cartGraph()
     }

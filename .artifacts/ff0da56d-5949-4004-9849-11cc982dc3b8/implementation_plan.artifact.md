@@ -1,29 +1,42 @@
-# Implementación de Imágenes mediante CDN de Retailers (Estrategia Target)
+# Implementación de Detalles de Producto
 
-Este plan detalla la implementación de una solución de alto rendimiento y costo cero para mostrar imágenes de productos americanos, construyendo dinámicamente URLs basadas en el código UPC/GTIN obtenido de la USDA y apuntando al CDN de Target.
+Este plan detalla la creación de una vista de detalles que se despliega al tocar un producto, integrando datos extendidos de la USDA.
 
 ## User Review Required
 
-> [!NOTE]
-> Esta estrategia es síncrona y no requiere llamadas adicionales a la red, lo que garantiza una velocidad de carga máxima en la lista de productos.
+> [!TIP]
+> Utilizaremos un `ModalBottomSheet` para mostrar los detalles de forma rápida sin salir de la lista, o una pantalla completa según la navegación. Dado que solicitaste una "pestaña que se despliegue", implementaremos un Bottom Sheet expansible.
 
 ## Proposed Changes
 
-### Core Data (Utilidades y Mapeo)
+### Core Network
 
-#### [NEW] [UsdaImageResolver.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/util/UsdaImageResolver.kt)
-- Implementar la lógica de construcción de URL: `https://images.targetimg1.com/wcsstore/TargetSAS/img/p/{subfolder}/{upc}.jpg`.
-- Extraer la subcarpeta (dígitos del final del UPC) según el patrón del CDN.
+#### [MODIFY] [USDAFoodDataService.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/api/USDAFoodDataService.kt)
+- Añadir endpoint `GET v1/food/{fdcId}` para obtener detalles completos.
+
+### Core Domain / Data
+
+#### [MODIFY] [ProductRepository.kt](file:///D:/Jorgito/Proyects/Mimercado/core/domain/src/main/java/com/saico/mimercado/core/domain/repository/ProductRepository.kt)
+- Añadir método `getProductDetails(fdcId: String): Result<ProductDetails>`.
 
 #### [MODIFY] [NetworkProductRepository.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/repository/NetworkProductRepository.kt)
-- Utilizar `UsdaImageResolver` durante la transformación de DTO a modelo de Dominio.
-- Formatear el nombre del producto (Title Case) para mejorar la legibilidad.
+- Implementar la llamada a los detalles.
 
-### Core UI (Renderizado)
+### Core UI (Navegación)
+
+#### [MODIFY] [NavigationCommand.kt](file:///D:/Jorgito/Proyects/Mimercado/core/ui/src/main/java/com/saico/mimercado/core/ui/navigation/NavigationCommand.kt)
+- Añadir `ProductDetailsRoute(val fdcId: String)` a las rutas tipadas.
+
+### Feature Products
+
+#### [NEW] [ProductDetailsViewModel.kt](file:///D:/Jorgito/Proyects/Mimercado/feature/products/src/main/java/com/saico/mimercado/feature/products/ProductDetailsViewModel.kt)
+- Gestionar la carga de datos del producto seleccionado.
+
+#### [NEW] [ProductDetailsScreen.kt](file:///D:/Jorgito/Proyects/Mimercado/feature/products/src/main/java/com/saico/mimercado/feature/products/ProductDetailsScreen.kt)
+- UI para mostrar la imagen grande, ingredientes, tabla nutricional y marca.
 
 #### [MODIFY] [ProductRow.kt](file:///D:/Jorgito/Proyects/Mimercado/core/ui/src/main/java/com/saico/mimercado/core/ui/components/ProductRow.kt)
-- Configurar `AsyncImage` de Coil para manejar el caché en disco.
-- Añadir un placeholder y una imagen de error elegante para los casos donde el CDN no tenga la foto exacta.
+- Hacer que la tarjeta sea clicable para disparar la navegación.
 
 ## Verification Plan
 
@@ -31,6 +44,6 @@ Este plan detalla la implementación de una solución de alto rendimiento y cost
 - Ejecutar `gradle assembleDebug`.
 
 ### Manual Verification
-1. Abrir la app y buscar productos conocidos (ej. "Cheerios", "Coca Cola").
-2. Verificar que las imágenes cargan instantáneamente desde el CDN de Target.
-3. Confirmar que el desplazamiento por la lista sigue siendo fluido (60fps) gracias a que no hay llamadas extra de red.
+1. Tocar un producto (ej: "Angel Food Cake").
+2. Verificar que se despliega la vista de detalles.
+3. Confirmar que se muestran los ingredientes y la marca oficial.

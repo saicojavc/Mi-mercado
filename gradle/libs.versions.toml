@@ -49,6 +49,7 @@ activityKtx = "1.10.1"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.2.0"
 splashscreen = "1.2.0"
+barcodeScanning = "17.3.0"
 
 #config
 compileSdk = "37"
@@ -117,6 +118,7 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcodeScanning" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

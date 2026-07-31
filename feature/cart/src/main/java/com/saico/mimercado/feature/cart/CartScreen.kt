@@ -1,7 +1,11 @@
 package com.saico.mimercado.feature.cart
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,14 +13,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -25,11 +32,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.saico.mimercado.core.model.CartItem
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.ErrorRed
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
+import com.saico.mimercado.core.ui.theme.TextDark
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -58,14 +68,14 @@ fun CartScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.cart_title),
+                text = "Tu Carrito",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             if (cartItems.isNotEmpty()) {
                 TextButton(onClick = { viewModel.clearCart() }) {
                     Text(
-                        text = stringResource(R.string.clear_cart),
+                        text = "Vaciar",
                         color = PrimaryCyan,
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -83,7 +93,7 @@ fun CartScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.empty_cart),
+                    text = "No hay productos en el carrito",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -125,22 +135,28 @@ fun CartItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier.size(64.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
+                color = Color(0xFFF3F3F5)
             ) {
                 if (item.imageUrl.isNotEmpty()) {
                     AsyncImage(
-                        model = item.imageUrl,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(item.imageUrl)
+                            .crossfade(true)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build(),
                         contentDescription = item.nombre,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 } else {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "📦",
-                            fontSize = 24.sp
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = null,
+                            tint = Color.LightGray,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
@@ -161,7 +177,7 @@ fun CartItemRow(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.item_quantity, item.cantidad),
+                    text = "Cantidad: ${item.cantidad}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -169,7 +185,7 @@ fun CartItemRow(
             IconButton(onClick = onRemove) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.remove_from_cart),
+                    contentDescription = "Eliminar del carrito",
                     tint = ErrorRed
                 )
             }
