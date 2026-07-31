@@ -25,13 +25,16 @@ class NetworkProductRepository @Inject constructor(
         page: Int
     ): Result<List<Product>> = coroutineScope {
         try {
+            val isUpc = searchQuery != null && searchQuery.all { it.isDigit() } && searchQuery.length >= 8
+            
             val baseQuery = when {
                 !searchQuery.isNullOrBlank() -> searchQuery
                 !category.isNullOrBlank() && category != "Todos" -> mapToEnglishCategory(category)
                 else -> "food"
             }
             
-            val finalQuery = if (!store.isNullOrBlank()) "$baseQuery $store" else baseQuery
+            // Do NOT append store if searching by exact UPC to avoid API confusion
+            val finalQuery = if (!store.isNullOrBlank() && !isUpc) "$baseQuery $store" else baseQuery
             
             val usdaResponse = usdaService.searchFoods(
                 apiKey = BuildConfig.USDA_API_KEY,

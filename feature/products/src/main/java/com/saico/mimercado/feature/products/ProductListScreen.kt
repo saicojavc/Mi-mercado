@@ -63,6 +63,7 @@ fun ProductListScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val isPaginating by viewModel.isPaginating.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val listMode by viewModel.listMode.collectAsState()
     val categories = viewModel.categories
     val stores = viewModel.stores
 
@@ -109,18 +110,37 @@ fun ProductListScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = AppBackground,
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AppBackground,
-                    titleContentColor = TextDark
+            Column {
+                TopAppBar(
+                    title = { 
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            fontWeight = FontWeight.Bold
+                        ) 
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = AppBackground,
+                        titleContentColor = TextDark
+                    )
                 )
-            )
+                
+                SecondaryTabRow(
+                    selectedTabIndex = listMode.ordinal,
+                    containerColor = AppBackground,
+                    contentColor = PrimaryCyan
+                ) {
+                    Tab(
+                        selected = listMode == ListMode.HABITUAL,
+                        onClick = { viewModel.setListMode(ListMode.HABITUAL) },
+                        text = { Text("Habitual", fontWeight = FontWeight.Bold) }
+                    )
+                    Tab(
+                        selected = listMode == ListMode.DISCOVER,
+                        onClick = { viewModel.setListMode(ListMode.DISCOVER) },
+                        text = { Text("Discover", fontWeight = FontWeight.Bold) }
+                    )
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -161,7 +181,7 @@ fun ProductListScreen(
                     value = searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search products or UPC...") },
+                    placeholder = { Text(if (listMode == ListMode.HABITUAL) "Search habituals..." else "Search products or UPC...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { 
@@ -229,12 +249,19 @@ fun ProductListScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading && products.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (products.isEmpty() && !isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (listMode == ListMode.HABITUAL) "No habitual products yet." else "No products found.",
+                            color = Color.Gray
+                        )
+                    }
                 } else {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(products) { product ->
+                        items(products, key = { it.id }) { product ->
                             ProductRow(
                                 product = product,
                                 onAddClick = { onAddToCart(product) },
@@ -269,7 +296,7 @@ fun ProductListScreen(
                 BarcodeScannerView(
                     onBarcodeScanned = { barcode ->
                         showScanner = false
-                        viewModel.onSearchQueryChanged(barcode)
+                        viewModel.onSearchQueryChanged(barcode, isScan = true)
                     }
                 )
                 

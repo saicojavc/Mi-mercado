@@ -7,6 +7,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Restaurant
@@ -31,15 +34,41 @@ import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
 import com.saico.mimercado.core.ui.theme.TextDark
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel,
-    onAddToCart: (Product) -> Unit
+    onAddToCart: (Product) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
 
     Scaffold(
         containerColor = AppBackground,
+        topBar = {
+            TopAppBar(
+                title = { Text("Product Details") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (uiState is ProductDetailsUiState.Success) {
+                        val details = (uiState as ProductDetailsUiState.Success).details
+                        IconButton(onClick = { viewModel.toggleFavorite(details) }) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (isFavorite) Color.Red else Color.Gray
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground)
+            )
+        },
         bottomBar = {
             if (uiState is ProductDetailsUiState.Success) {
                 val details = (uiState as ProductDetailsUiState.Success).details

@@ -9,7 +9,8 @@ data class Product(
     val nombre: String = "",
     val categoria: String = "",
     val imageUrl: String = "",
-    val brands: String = ""
+    val brands: String = "",
+    val isFavorite: Boolean = false
 ) {
     companion object {
         val sampleProducts = listOf(

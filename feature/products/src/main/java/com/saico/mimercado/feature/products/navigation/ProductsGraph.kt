@@ -37,7 +37,8 @@ fun NavGraphBuilder.productsGraph(
         val viewModel: ProductDetailsViewModel = hiltViewModel()
         ProductDetailsScreen(
             viewModel = viewModel,
-            onAddToCart = onAddToCart
+            onAddToCart = onAddToCart,
+            onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
         )
     }
 }

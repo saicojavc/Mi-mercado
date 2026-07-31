@@ -23,6 +23,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
 import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize device token registration on startup
+        checkGooglePlayServices()
         fcmManager.registerDeviceToken()
 
         setContent {
@@ -81,6 +84,18 @@ class MainActivity : ComponentActivity() {
                         navigator = navigator
                     )
                 }
+            }
+        }
+    }
+
+    private fun checkGooglePlayServices() {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this)
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                googleApiAvailability.getErrorDialog(this, resultCode, 9000)?.show()
+            } else {
+                Log.e("MainActivity", "❌ This device is not supported for Google Play Services")
             }
         }
     }
