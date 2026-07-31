@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.google.devtools.ksp)
@@ -8,10 +10,18 @@ android {
     namespace = "com.saico.mimercado.core.network"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
+    val envFile = rootProject.file(".env")
+    val properties = Properties()
+    if (envFile.exists()) {
+        properties.load(envFile.inputStream())
+    }
+    val usdaKey = properties.getProperty("USDA_API_KEY") ?: ""
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        buildConfigField("String", "USDA_API_KEY", "\"$usdaKey\"")
     }
 
     buildTypes {
@@ -23,6 +33,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 

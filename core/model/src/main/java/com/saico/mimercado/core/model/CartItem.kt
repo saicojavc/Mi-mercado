@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class CartItem(
     var itemId: String = "",
     var nombre: String = "",
-    var emoji: String = "",
+    var brands: String = "",
+    var imageUrl: String = "",
     var categoria: String = "",
     var cantidad: Int = 0,
     var timestamp: Long = System.currentTimeMillis(),

@@ -52,7 +52,8 @@ class FirestoreCartRepository @Inject constructor(
             val cartItem = CartItem(
                 itemId = newItemId,
                 nombre = product.nombre,
-                emoji = product.emoji,
+                brands = product.brands,
+                imageUrl = product.imageUrl,
                 categoria = product.categoria,
                 cantidad = 1,
                 timestamp = System.currentTimeMillis(),

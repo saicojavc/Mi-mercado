@@ -1,29 +1,32 @@
-# Walkthrough - Sustitución Total de productId por itemId
+# Walkthrough - Migración a USDA FoodData Central API
 
-He completado la eliminación definitiva del campo `productId` en favor de `itemId` en toda la aplicación (Android y Cloud Functions), unificando el identificador para los elementos del carrito.
+He sustituido la integración de Open Food Facts por la API de **USDA FoodData Central**, proporcionando acceso a un catálogo de productos mucho más preciso para el mercado de Estados Unidos.
 
 ## Cambios Realizados
 
-### Modelo de Datos
-- **[CartItem.kt](file:///D:/Jorgito/Proyects/Mimercado/app/src/main/java/com/saico/mimercado/model/CartItem.kt)**: Se eliminó por completo el campo `productId`. Ahora el objeto solo utiliza `itemId`.
+### Configuración y Seguridad
+- **[.env](file:///D:/Jorgito/Proyects/Mimercado/.env)**: Se añadió la variable `USDA_API_KEY` con la clave proporcionada.
+- **[core/network/build.gradle.kts](file:///D:/Jorgito/Proyects/Mimercado/core/network/build.gradle.kts)**: Se configuró el módulo para leer la clave del archivo `.env` y exponerla de forma segura a través de `BuildConfig.USDA_API_KEY`.
 
-### Lógica del Carrito (Android)
-- **[CartViewModel.kt](file:///D:/Jorgito/Proyects/Mimercado/app/src/main/java/com/saico/mimercado/ui/viewmodel/CartViewModel.kt)**:
-    - **`addToCart`**: Se implementó una lógica de búsqueda por prefijo. Ahora, para detectar si un producto ya existe en el carrito del usuario, se comprueba si algún `itemId` (ID del documento) comienza con `product.id + "_"`.
-    - **Operaciones Unificadas**: Todas las funciones (`incrementQuantity`, `decrementQuantity`, `removeFromCart`) ahora operan exclusivamente basándose en el `itemId`.
+### Infraestructura de Red (USDA)
+- **[USDAFoodDataService.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/api/USDAFoodDataService.kt)**: Se implementó la interfaz Retrofit para el endpoint `v1/foods/search`.
+- **[USDADto.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/dto/USDADto.kt)**: Estructuras de datos específicas para la respuesta de la USDA.
+- **[NetworkModule.kt](file:///D:/Jorgito/Proyects/Mimercado/core/network/src/main/java/com/saico/mimercado/core/network/di/NetworkModule.kt)**: Se actualizó la URL base a `https://api.nal.usda.gov/fdc/`.
 
-### Cloud Functions
-- **[index.js](file:///D:/Jorgito/Proyects/Mimercado/functions/index.js)**:
-    - Se actualizó el disparador `onCreate` para usar `itemId` en lugar de `productId` en los parámetros del contexto.
-    - Se eliminaron las referencias a `productId` en los logs y la lógica interna para evitar errores de tipo `undefined`.
+### Capa de Datos
+- **[NetworkProductRepository.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/repository/NetworkProductRepository.kt)**:
+    - Ahora utiliza la API de la USDA.
+    - Se implementó un mapeo de categorías a términos en inglés (ej: "Lácteos" -> "Dairy") para obtener resultados más precisos en las búsquedas automáticas.
+    - Soporta plenamente la barra de búsqueda y la paginación.
+
+### Limpieza
+- Se eliminaron las interfaces y DTOs de Open Food Facts para evitar redundancia y confusión en el código.
 
 ## Verificación Realizada
 
-- **Compilación**: La aplicación Android compila sin errores tras la eliminación del campo `productId`.
-- **Lógica de Documentos**: Se ha asegurado que el patrón de ID en Firestore (`{productId}_{timestamp}`) permita la identificación unívoca por prefijo.
+- **Compilación**: ✅ Exitosa (`assembleDebug`).
+- **Seguridad**: La API Key está protegida y no se incluye directamente en el código fuente.
+- **Funcionalidad**: Se ha verificado que la búsqueda por categoría y por texto libre funciona correctamente con el nodo de la USDA.
 
-> [!TIP]
-> Al haber eliminado `productId`, los documentos antiguos que aún tengan ese campo no causarán errores, pero las nuevas entradas serán más limpias y consistentes con la arquitectura de `itemId` único.
-
-> [!IMPORTANT]
-> Recuerda desplegar la Cloud Function actualizada para que los cambios en el filtrado de notificaciones surtan efecto inmediatamente.
+> [!NOTE]
+> La API de la USDA suele centrarse en datos nutricionales y descripciones textuales. A diferencia de Open Food Facts, las imágenes de producto no siempre están disponibles directamente en el endpoint de búsqueda, por lo que verás el icono de carrito 🛒 como placeholder en esos casos.

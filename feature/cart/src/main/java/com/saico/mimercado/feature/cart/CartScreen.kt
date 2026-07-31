@@ -16,16 +16,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.saico.mimercado.core.model.CartItem
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.ErrorRed
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
+import com.saico.mimercado.core.ui.theme.SecondaryTeal
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -121,15 +125,24 @@ fun CartItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = CircleShape,
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = item.emoji,
-                        fontSize = 24.sp
+                if (item.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = item.imageUrl,
+                        contentDescription = item.nombre,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "📦",
+                            fontSize = 24.sp
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -137,8 +150,16 @@ fun CartItemRow(
                 Text(
                     text = item.nombre,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2
                 )
+                if (item.brands.isNotEmpty()) {
+                    Text(
+                        text = item.brands,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryTeal
+                    )
+                }
                 Text(
                     text = stringResource(R.string.item_quantity, item.cantidad),
                     style = MaterialTheme.typography.bodyMedium,

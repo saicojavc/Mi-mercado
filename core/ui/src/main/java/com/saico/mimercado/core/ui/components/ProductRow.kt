@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,11 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.theme.MiMercadoTheme
@@ -64,29 +66,46 @@ fun ProductRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
+                modifier = Modifier.size(64.dp),
+                shape = RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = product.emoji,
-                        fontSize = 32.sp
+                if (product.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = product.nombre,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "🛒",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = product.nombre,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = TextDark,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2
                 )
+                if (product.brands.isNotEmpty()) {
+                    Text(
+                        text = product.brands,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryTeal
+                    )
+                }
                 Text(
                     text = product.categoria,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SecondaryTeal
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
                 )
             }
 
@@ -127,7 +146,7 @@ fun ProductRow(
 fun ProductRowPreview() {
     MiMercadoTheme {
         ProductRow(
-            product = Product("1", "Leche Entera", "Lácteos", "🥛"),
+            product = Product("1", "Leche Entera", "Lácteos", "", "Marca B"),
             onAddClick = {}
         )
     }

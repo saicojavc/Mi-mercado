@@ -1,43 +1,36 @@
-# Plan de Eliminación de productId a favor de itemId
+# Implementación de Imágenes mediante CDN de Retailers (Estrategia Target)
 
-Este plan detalla la eliminación definitiva del campo `productId` en el modelo y la lógica de la aplicación, consolidando a `itemId` como el único identificador para los elementos del carrito en Firestore.
+Este plan detalla la implementación de una solución de alto rendimiento y costo cero para mostrar imágenes de productos americanos, construyendo dinámicamente URLs basadas en el código UPC/GTIN obtenido de la USDA y apuntando al CDN de Target.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> Al eliminar el campo `productId`, la identificación de "productos iguales" para incrementar cantidad ahora se basará en el prefijo del `itemId` (que contiene el ID del producto). Esto simplifica el modelo pero requiere filtrar los resultados en el cliente o mediante consultas de rango en Firestore.
+> [!NOTE]
+> Esta estrategia es síncrona y no requiere llamadas adicionales a la red, lo que garantiza una velocidad de carga máxima en la lista de productos.
 
 ## Proposed Changes
 
-### Modelo de Datos
+### Core Data (Utilidades y Mapeo)
 
-#### [MODIFY] [CartItem.kt](file:///D:/Jorgito/Proyects/Mimercado/app/src/main/java/com/saico/mimercado/model/CartItem.kt)
-- Eliminar el campo `productId`.
-- `itemId` será el único campo de identificación.
+#### [NEW] [UsdaImageResolver.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/util/UsdaImageResolver.kt)
+- Implementar la lógica de construcción de URL: `https://images.targetimg1.com/wcsstore/TargetSAS/img/p/{subfolder}/{upc}.jpg`.
+- Extraer la subcarpeta (dígitos del final del UPC) según el patrón del CDN.
 
-### Lógica de Negocio
+#### [MODIFY] [NetworkProductRepository.kt](file:///D:/Jorgito/Proyects/Mimercado/core/data/src/main/java/com/saico/mimercado/core/data/repository/NetworkProductRepository.kt)
+- Utilizar `UsdaImageResolver` durante la transformación de DTO a modelo de Dominio.
+- Formatear el nombre del producto (Title Case) para mejorar la legibilidad.
 
-#### [MODIFY] [CartViewModel.kt](file:///D:/Jorgito/Proyects/Mimercado/app/src/main/java/com/saico/mimercado/ui/viewmodel/CartViewModel.kt)
-- **`addToCart`**:
-    - Obtener todos los ítems del usuario actual (`whereEqualTo("addedBy", userId)`).
-    - Buscar localmente si alguno tiene un `itemId` que comience con `product.id + "_"`.
-    - Si existe, incrementar cantidad del `itemId` encontrado.
-    - Si no, generar nuevo `itemId = "${product.id}_${System.currentTimeMillis()}"` y guardar.
-- **Operaciones**: Asegurar que `incrementQuantity`, `decrementQuantity` y `removeFromCart` operan exclusivamente sobre `itemId`.
+### Core UI (Renderizado)
 
-### Cloud Functions
-
-#### [MODIFY] [index.js](file:///D:/Jorgito/Proyects/Mimercado/functions/index.js)
-- Eliminar cualquier referencia a `productId` en la desestructuración y logs.
-- Utilizar `itemId` como identificador principal.
+#### [MODIFY] [ProductRow.kt](file:///D:/Jorgito/Proyects/Mimercado/core/ui/src/main/java/com/saico/mimercado/core/ui/components/ProductRow.kt)
+- Configurar `AsyncImage` de Coil para manejar el caché en disco.
+- Añadir un placeholder y una imagen de error elegante para los casos donde el CDN no tenga la foto exacta.
 
 ## Verification Plan
 
 ### Automated Tests
-- Ejecutar `gradle assembleDebug` para confirmar que no hay errores de compilación tras la eliminación del campo.
+- Ejecutar `gradle assembleDebug`.
 
 ### Manual Verification
-1. Agregar "Leche" al carrito.
-2. Verificar en Firestore que el documento NO tiene campo `productId`, solo `itemId`.
-3. Agregar "Leche" de nuevo y verificar que se incrementa la cantidad en el mismo documento (detectado por prefijo).
-4. Verificar que la Cloud Function se dispara correctamente usando el `itemId` del path.
+1. Abrir la app y buscar productos conocidos (ej. "Cheerios", "Coca Cola").
+2. Verificar que las imágenes cargan instantáneamente desde el CDN de Target.
+3. Confirmar que el desplazamiento por la lista sigue siendo fluido (60fps) gracias a que no hay llamadas extra de red.
