@@ -2,6 +2,7 @@ package com.saico.mimercado.feature.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.saico.mimercado.core.common.CategoryMapper
 import com.saico.mimercado.core.domain.repository.FavoriteRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
 import com.saico.mimercado.core.model.Product
@@ -64,7 +65,7 @@ class ProductListViewModel @Inject constructor(
         val baseList = if (mode == ListMode.HABITUAL) favorites else discover
         
         baseList.filter { product ->
-            val matchesCategory = category == "Todos" || product.categoria.contains(category, ignoreCase = true)
+            val matchesCategory = CategoryMapper.matches(product.categoria, category)
             val matchesStore = store == null || product.brands.contains(store, ignoreCase = true)
             val matchesQuery = query.isBlank() || product.nombre.contains(query, ignoreCase = true) || product.brands.contains(query, ignoreCase = true) || product.upc == query
             matchesCategory && matchesStore && matchesQuery

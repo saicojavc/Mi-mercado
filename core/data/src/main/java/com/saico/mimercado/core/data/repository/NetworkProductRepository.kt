@@ -1,5 +1,6 @@
 package com.saico.mimercado.core.data.repository
 
+import com.saico.mimercado.core.common.CategoryMapper
 import com.saico.mimercado.core.common.UsdaImageResolver
 import com.saico.mimercado.core.domain.repository.ProductRepository
 import com.saico.mimercado.core.model.Product
@@ -29,11 +30,10 @@ class NetworkProductRepository @Inject constructor(
             
             val baseQuery = when {
                 !searchQuery.isNullOrBlank() -> searchQuery
-                !category.isNullOrBlank() && category != "Todos" -> mapToEnglishCategory(category)
+                !category.isNullOrBlank() && category != "Todos" -> CategoryMapper.mapToEnglish(category)
                 else -> "food"
             }
             
-            // Do NOT append store if searching by exact UPC to avoid API confusion
             val finalQuery = if (!store.isNullOrBlank() && !isUpc) "$baseQuery $store" else baseQuery
             
             val usdaResponse = usdaService.searchFoods(
@@ -115,19 +115,6 @@ class NetworkProductRepository @Inject constructor(
             Result.success(details)
         } catch (e: Exception) {
             Result.failure(e)
-        }
-    }
-
-    private fun mapToEnglishCategory(category: String): String {
-        return when (category) {
-            "Lácteos" -> "Dairy"
-            "Panadería" -> "Bakery"
-            "Carnes" -> "Meat"
-            "Frutas y verduras" -> "Fruit Vegetable"
-            "Despensa" -> "Pantry"
-            "Limpieza" -> "Cleaning"
-            "Bebidas" -> "Beverage"
-            else -> category
         }
     }
 
