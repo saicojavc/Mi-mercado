@@ -1,8 +1,8 @@
 package com.saico.mimercado.core.data.di
 
+import com.saico.mimercado.core.data.repository.FavoriteRepositoryImpl
 import com.saico.mimercado.core.data.repository.FirestoreCartRepository
-import com.saico.mimercado.core.data.repository.FirestoreFavoriteRepository
-import com.saico.mimercado.core.data.repository.NetworkProductRepository
+import com.saico.mimercado.core.data.repository.ProductRepositoryImpl
 import com.saico.mimercado.core.domain.repository.CartRepository
 import com.saico.mimercado.core.domain.repository.FavoriteRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
@@ -25,12 +25,12 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(
-        networkProductRepository: NetworkProductRepository
+        productRepositoryImpl: ProductRepositoryImpl
     ): ProductRepository
 
     @Binds
     @Singleton
     abstract fun bindFavoriteRepository(
-        firestoreFavoriteRepository: FirestoreFavoriteRepository
+        favoriteRepositoryImpl: FavoriteRepositoryImpl
     ): FavoriteRepository
 }

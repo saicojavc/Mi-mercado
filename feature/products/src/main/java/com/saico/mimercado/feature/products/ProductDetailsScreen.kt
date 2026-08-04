@@ -33,6 +33,7 @@ import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
 import com.saico.mimercado.core.ui.theme.TextDark
+import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

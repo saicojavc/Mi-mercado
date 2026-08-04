@@ -44,6 +44,7 @@ import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.TextDark
 import com.saico.mimercado.feature.products.components.BarcodeScannerView
+import com.saico.mimercado.feature.products.model.ListMode
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
@@ -57,13 +58,9 @@ fun ProductListScreen(
     onProductClick: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val selectedCategory by viewModel.selectedCategory.collectAsState()
-    val selectedStore by viewModel.selectedStore.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.filteredProducts.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val isPaginating by viewModel.isPaginating.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val listMode by viewModel.listMode.collectAsState()
+    
     val categories = viewModel.categories
     val stores = viewModel.stores
 
@@ -114,7 +111,7 @@ fun ProductListScreen(
                 TopAppBar(
                     title = { 
                         Text(
-                            text = stringResource(R.string.app_name),
+                            text = stringResource(com.saico.mimercado.core.ui.R.string.app_name),
                             fontWeight = FontWeight.Bold
                         ) 
                     },
@@ -125,17 +122,17 @@ fun ProductListScreen(
                 )
                 
                 SecondaryTabRow(
-                    selectedTabIndex = listMode.ordinal,
+                    selectedTabIndex = uiState.listMode.ordinal,
                     containerColor = AppBackground,
                     contentColor = PrimaryCyan
                 ) {
                     Tab(
-                        selected = listMode == ListMode.HABITUAL,
+                        selected = uiState.listMode == ListMode.HABITUAL,
                         onClick = { viewModel.setListMode(ListMode.HABITUAL) },
                         text = { Text("Habitual", fontWeight = FontWeight.Bold) }
                     )
                     Tab(
-                        selected = listMode == ListMode.DISCOVER,
+                        selected = uiState.listMode == ListMode.DISCOVER,
                         onClick = { viewModel.setListMode(ListMode.DISCOVER) },
                         text = { Text("Discover", fontWeight = FontWeight.Bold) }
                     )
@@ -178,10 +175,10 @@ fun ProductListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
-                    value = searchQuery,
+                    value = uiState.searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text(if (listMode == ListMode.HABITUAL) "Search habituals..." else "Search products or UPC...") },
+                    placeholder = { Text(if (uiState.listMode == ListMode.HABITUAL) "Search habituals..." else "Search products or UPC...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { 
@@ -215,12 +212,12 @@ fun ProductListScreen(
                     Icon(
                         imageVector = Icons.Default.FilterList,
                         contentDescription = "Filter by Store",
-                        tint = if (selectedStore != null) MaterialTheme.colorScheme.primary else Color.Gray
+                        tint = if (uiState.selectedStore != null) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 }
             }
 
-            AnimatedVisibility(visible = showStoreFilters || selectedStore != null) {
+            AnimatedVisibility(visible = showStoreFilters || uiState.selectedStore != null) {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -228,7 +225,7 @@ fun ProductListScreen(
                 ) {
                     items(stores) { store ->
                         FilterChip(
-                            selected = selectedStore == store,
+                            selected = uiState.selectedStore == store,
                             onClick = { viewModel.onStoreSelected(store) },
                             label = { Text(store) },
                             colors = FilterChipDefaults.filterChipColors(
@@ -242,17 +239,17 @@ fun ProductListScreen(
 
             CategoryFilter(
                 categories = categories,
-                selectedCategory = selectedCategory,
+                selectedCategory = uiState.selectedCategory,
                 onCategorySelected = { viewModel.selectCategory(it) }
             )
             
             Box(modifier = Modifier.fillMaxSize()) {
-                if (isLoading && products.isEmpty()) {
+                if (uiState.isLoading && products.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                } else if (products.isEmpty() && !isLoading) {
+                } else if (products.isEmpty() && !uiState.isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = if (listMode == ListMode.HABITUAL) "No habitual products yet." else "No products found.",
+                            text = if (uiState.listMode == ListMode.HABITUAL) "No habitual products yet." else "No products found.",
                             color = Color.Gray
                         )
                     }
@@ -269,7 +266,7 @@ fun ProductListScreen(
                             )
                         }
                         
-                        if (isPaginating) {
+                        if (uiState.isPaginating) {
                             item {
                                 Box(
                                     modifier = Modifier

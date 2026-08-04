@@ -4,11 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.saico.mimercado.core.domain.repository.FavoriteRepository
-import com.saico.mimercado.core.domain.repository.ProductRepository
+import com.saico.mimercado.core.domain.usecase.products.ProductsUseCases
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
+import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,8 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val productRepository: ProductRepository,
-    private val favoriteRepository: FavoriteRepository
+    private val useCases: ProductsUseCases
 ) : ViewModel() {
 
     private val route: ProductDetailsRoute = savedStateHandle.toRoute()
@@ -31,7 +30,7 @@ class ProductDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ProductDetailsUiState>(ProductDetailsUiState.Loading)
     val uiState: StateFlow<ProductDetailsUiState> = _uiState.asStateFlow()
 
-    val isFavorite = favoriteRepository.isFavorite(fdcId)
+    val isFavorite = useCases.isFavorite(fdcId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     init {
@@ -41,7 +40,7 @@ class ProductDetailsViewModel @Inject constructor(
     private fun loadDetails() {
         viewModelScope.launch {
             _uiState.value = ProductDetailsUiState.Loading
-            productRepository.getProductDetails(fdcId)
+            useCases.getProductDetails(fdcId)
                 .onSuccess { details ->
                     _uiState.value = ProductDetailsUiState.Success(details)
                 }
@@ -53,7 +52,7 @@ class ProductDetailsViewModel @Inject constructor(
 
     fun toggleFavorite(details: ProductDetails) {
         viewModelScope.launch {
-            favoriteRepository.toggleFavorite(
+            useCases.toggleFavorite(
                 Product(
                     id = details.id,
                     upc = details.upc,
@@ -66,10 +65,4 @@ class ProductDetailsViewModel @Inject constructor(
             )
         }
     }
-}
-
-sealed interface ProductDetailsUiState {
-    object Loading : ProductDetailsUiState
-    data class Success(val details: ProductDetails) : ProductDetailsUiState
-    data class Error(val message: String) : ProductDetailsUiState
 }
