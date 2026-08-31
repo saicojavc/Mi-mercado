@@ -1,15 +1,10 @@
 package com.saico.mimercado.feature.cart
 
 import android.widget.Toast
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -19,18 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -39,7 +29,7 @@ import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.ErrorRed
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
-import com.saico.mimercado.core.ui.theme.TextDark
+import com.saico.mimercado.feature.cart.model.CartUiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -47,12 +37,16 @@ fun CartScreen(
     viewModel: CartViewModel,
     modifier: Modifier = Modifier
 ) {
-    val cartItems by viewModel.cartItems.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(viewModel.errorMessages) {
-        viewModel.errorMessages.collectLatest { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is CartUiEvent.ShowMessage -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -72,7 +66,7 @@ fun CartScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            if (cartItems.isNotEmpty()) {
+            if (uiState.items.isNotEmpty()) {
                 TextButton(onClick = { viewModel.clearCart() }) {
                     Text(
                         text = "Vaciar",
@@ -85,16 +79,32 @@ fun CartScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (cartItems.isEmpty()) {
-            Box(
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = PrimaryCyan)
+            }
+        } else if (uiState.items.isEmpty()) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 48.dp),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = Color.LightGray.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "No hay productos en el carrito",
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = "Tu carrito está vacío",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Agrega algunos productos para comenzar",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -104,7 +114,7 @@ fun CartScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(cartItems) { item ->
+                items(uiState.items) { item ->
                     CartItemRow(
                         item = item,
                         onRemove = { viewModel.removeFromCart(item) }

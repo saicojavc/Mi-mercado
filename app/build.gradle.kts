@@ -59,6 +59,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":feature:products"))
     implementation(project(":feature:cart"))
+    implementation(project(":feature:search"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

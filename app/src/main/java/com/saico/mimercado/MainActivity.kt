@@ -33,6 +33,7 @@ import com.saico.mimercado.core.ui.theme.MiMercadoTheme
 import com.saico.mimercado.feature.cart.CartViewModel
 import com.saico.mimercado.feature.cart.navigation.cartGraph
 import com.saico.mimercado.feature.products.navigation.productsGraph
+import com.saico.mimercado.feature.search.navigation.searchGraph
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -108,8 +109,8 @@ private fun MainContainer(
     navigator: Navigator
 ) {
     val cartViewModel: CartViewModel = hiltViewModel()
-    val cartItems by cartViewModel.cartItems.collectAsState()
-    val totalItems = cartItems.sumOf { it.cantidad }
+    val cartUiState by cartViewModel.uiState.collectAsState()
+    val totalItems = cartUiState.items.sumOf { it.cantidad }
 
     NavHost(
         navController = navController,
@@ -121,6 +122,7 @@ private fun MainContainer(
             onAddToCart = { cartViewModel.addToCart(it) },
             navigator = navigator
         )
+        searchGraph(navigator = navigator)
         cartGraph()
     }
 }
