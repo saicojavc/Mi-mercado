@@ -16,24 +16,35 @@ object CategoryMapper {
     }
 
     /**
-     * Checks if a raw category from USDA matches a Spanish UI label.
+     * Legacy matches function
      */
     fun matches(rawCategory: String, uiLabel: String): Boolean {
+        return matchesSmart(rawCategory, "", uiLabel)
+    }
+
+    /**
+     * Checks if a raw category or product name matches a Spanish UI label smartly.
+     */
+    fun matchesSmart(rawCategory: String, productName: String, uiLabel: String): Boolean {
         if (uiLabel == "Todos") return true
+        if (rawCategory.equals(uiLabel, ignoreCase = true)) return true
         
         val english = mapToEnglish(uiLabel).lowercase()
-        val raw = rawCategory.lowercase()
+        val rawCat = rawCategory.lowercase()
+        val rawName = productName.lowercase()
         
-        // Specific checks for common USDA categories
-        return when (uiLabel) {
-            "Lácteos" -> raw.contains("dairy") || raw.contains("milk") || raw.contains("cheese") || raw.contains("yogurt")
-            "Panadería" -> raw.contains("bakery") || raw.contains("bread") || raw.contains("cake")
-            "Carnes" -> raw.contains("meat") || raw.contains("beef") || raw.contains("chicken") || raw.contains("pork")
-            "Frutas y verduras" -> raw.contains("fruit") || raw.contains("vegetable") || raw.contains("produce")
-            "Despensa" -> raw.contains("pantry") || raw.contains("grocery") || raw.contains("snack") || raw.contains("cereal")
-            "Limpieza" -> raw.contains("clean") || raw.contains("detergent") || raw.contains("household")
-            "Bebidas" -> raw.contains("beverage") || raw.contains("drink") || raw.contains("juice") || raw.contains("soda") || raw.contains("water")
-            else -> raw.contains(english) || raw.contains(uiLabel.lowercase())
+        // Combine sources for matching
+        val combined = "$rawCat $rawName"
+        
+        return when (uiLabel.lowercase()) {
+            "lácteos" -> combined.contains("dairy") || combined.contains("milk") || combined.contains("cheese") || combined.contains("yogurt") || combined.contains("queso") || combined.contains("leche") || combined.contains("cream") || combined.contains("butter")
+            "panadería" -> combined.contains("bakery") || combined.contains("bread") || combined.contains("cake") || combined.contains("pan ") || combined.contains("galleta") || combined.contains("cookie") || combined.contains("toast")
+            "carnes" -> combined.contains("meat") || combined.contains("beef") || combined.contains("chicken") || combined.contains("pork") || combined.contains("carne") || combined.contains("pollo") || combined.contains("turkey") || combined.contains("bacon")
+            "frutas y verduras" -> combined.contains("fruit") || combined.contains("vegetable") || combined.contains("produce") || combined.contains("manzana") || combined.contains("platano") || combined.contains("tomate") || combined.contains("salad")
+            "despensa" -> combined.contains("pantry") || combined.contains("grocery") || combined.contains("snack") || combined.contains("cereal") || combined.contains("arroz") || combined.contains("pasta") || combined.contains("bean") || combined.contains("oil")
+            "limpieza" -> combined.contains("clean") || combined.contains("detergent") || combined.contains("household") || combined.contains("jabon") || combined.contains("soap")
+            "bebidas" -> combined.contains("beverage") || combined.contains("drink") || combined.contains("juice") || combined.contains("soda") || combined.contains("water") || combined.contains("cafe") || combined.contains("agua") || combined.contains("coffee") || combined.contains("tea")
+            else -> combined.contains(english) || combined.contains(uiLabel.lowercase())
         }
     }
 }

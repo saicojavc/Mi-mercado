@@ -44,7 +44,7 @@ class ProductListViewModel @Inject constructor(
         val baseList = if (state.listMode == ListMode.HABITUAL) favorites else discover
         
         baseList.filter { product ->
-            val matchesCategory = state.selectedCategory == "Todos" || CategoryMapper.matches(product.categoria, state.selectedCategory)
+            val matchesCategory = state.selectedCategory == "Todos" || CategoryMapper.matchesSmart(product.categoria, product.nombre, state.selectedCategory)
             val matchesStore = state.selectedStore == null || product.brands.contains(state.selectedStore, ignoreCase = true)
             val matchesQuery = state.searchQuery.isBlank() || 
                               product.nombre.contains(state.searchQuery, ignoreCase = true) || 

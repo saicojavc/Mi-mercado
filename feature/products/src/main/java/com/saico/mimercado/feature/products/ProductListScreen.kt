@@ -64,9 +64,7 @@ fun ProductListScreen(
     val products by viewModel.filteredProducts.collectAsState()
     
     val categories = viewModel.categories
-    val stores = viewModel.stores
 
-    var showStoreFilters by remember { mutableStateOf(false) }
     var showScanner by remember { mutableStateOf(false) }
     
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -213,37 +211,6 @@ fun ProductListScreen(
                         focusedContainerColor = Color.White
                     )
                 )
-                
-                IconButton(
-                    onClick = { showStoreFilters = !showStoreFilters },
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = "Filter by Store",
-                        tint = if (uiState.selectedStore != null) MaterialTheme.colorScheme.primary else Color.Gray
-                    )
-                }
-            }
-
-            AnimatedVisibility(visible = showStoreFilters || uiState.selectedStore != null) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    items(stores) { store ->
-                        FilterChip(
-                            selected = uiState.selectedStore == store,
-                            onClick = { viewModel.onStoreSelected(store) },
-                            label = { Text(store) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        )
-                    }
-                }
             }
 
             CategoryFilter(
