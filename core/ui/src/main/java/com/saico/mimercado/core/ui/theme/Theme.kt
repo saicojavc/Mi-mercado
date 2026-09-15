@@ -14,6 +14,8 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = Color.White,
     onBackground = TextDark,
     onSurface = TextDark,
+    surfaceVariant = Color(0xFFF1F5F9),
+    onSurfaceVariant = Color(0xFF64748B),
     error = ErrorRed,
     onError = Color.White
 )

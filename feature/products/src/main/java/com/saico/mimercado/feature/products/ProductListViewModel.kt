@@ -43,7 +43,7 @@ class ProductListViewModel @Inject constructor(
     ) { state, discover, favorites ->
         val baseList = if (state.listMode == ListMode.HABITUAL) favorites else discover
         
-        baseList.filter { product ->
+        val filtered = baseList.filter { product ->
             val matchesCategory = state.selectedCategory == "Todos" || CategoryMapper.matchesSmart(product.categoria, product.nombre, state.selectedCategory)
             val matchesStore = state.selectedStore == null || product.brands.contains(state.selectedStore, ignoreCase = true)
             val matchesQuery = state.searchQuery.isBlank() || 
@@ -51,6 +51,12 @@ class ProductListViewModel @Inject constructor(
                               product.brands.contains(state.searchQuery, ignoreCase = true) || 
                               product.upc == state.searchQuery
             matchesCategory && matchesStore && matchesQuery
+        }
+
+        if (state.listMode == ListMode.DISCOVER) {
+            filtered.distinctBy { "${it.nombre.lowercase().trim()}_${it.brands.lowercase().trim()}" }
+        } else {
+            filtered
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.saico.mimercado.core.ui.components.CategoryFilter
-import com.saico.mimercado.core.ui.components.ProductRow
+import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,7 +68,7 @@ fun SearchScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(uiState.products, key = { it.id }) { product ->
-                    ProductRow(
+                    ProductCard(
                         product = product,
                         onAddClick = { viewModel.onEvent(SearchUiEvent.AddToCart(product)) },
                         onClick = { onProductClick(product.id) }

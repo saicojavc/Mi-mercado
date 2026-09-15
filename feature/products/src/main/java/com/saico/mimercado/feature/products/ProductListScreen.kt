@@ -40,7 +40,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.components.CategoryFilter
-import com.saico.mimercado.core.ui.components.ProductRow
+import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.TextDark
@@ -235,7 +235,7 @@ fun ProductListScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(products, key = { it.id }) { product ->
-                            ProductRow(
+                            ProductCard(
                                 product = product,
                                 onAddClick = { onAddToCart(product) },
                                 onClick = { onProductClick(product) }
