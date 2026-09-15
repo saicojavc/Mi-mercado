@@ -36,7 +36,8 @@ class RemoteFavoriteDataSourceImpl @Inject constructor(
                         categoria = doc.getString("categoria") ?: "",
                         imageUrl = doc.getString("imageUrl") ?: "",
                         brands = doc.getString("brands") ?: "",
-                        isFavorite = true
+                        isFavorite = true,
+                        isCustom = doc.getBoolean("isCustom") ?: false
                     )
                 } ?: emptyList()
                 trySend(products)
@@ -75,5 +76,20 @@ class RemoteFavoriteDataSourceImpl @Inject constructor(
                 trySend(snapshot?.exists() ?: false)
             }
         awaitClose { subscription.remove() }
+    }
+
+    override suspend fun saveCustomProduct(product: Product) {
+        try {
+            val data = mapOf(
+                "nombre" to product.nombre,
+                "categoria" to product.categoria,
+                "imageUrl" to product.imageUrl,
+                "brands" to product.brands,
+                "isCustom" to true
+            )
+            favoritesCollection.document(product.id).set(data).await()
+        } catch (e: Exception) {
+            Log.e("FirestoreFavorites", "❌ Failed to save custom product: ${e.message}", e)
+        }
     }
 }

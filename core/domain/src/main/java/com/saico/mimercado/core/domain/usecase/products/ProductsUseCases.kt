@@ -7,5 +7,7 @@ data class ProductsUseCases @Inject constructor(
     val getProductDetails: GetProductDetailsUseCase,
     val toggleFavorite: ToggleFavoriteUseCase,
     val getFavorites: GetFavoritesUseCase,
-    val isFavorite: IsFavoriteUseCase
+    val isFavorite: IsFavoriteUseCase,
+    val createCustomProduct: CreateCustomProductUseCase,
+    val searchProductImages: SearchProductImagesUseCase
 )

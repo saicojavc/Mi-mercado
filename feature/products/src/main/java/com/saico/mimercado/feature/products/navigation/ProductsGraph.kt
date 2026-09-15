@@ -6,8 +6,11 @@ import androidx.navigation.compose.composable
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
+import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
+import com.saico.mimercado.feature.products.CreateCustomProductScreen
+import com.saico.mimercado.feature.products.CreateCustomProductViewModel
 import com.saico.mimercado.feature.products.ProductDetailsScreen
 import com.saico.mimercado.feature.products.ProductDetailsViewModel
 import com.saico.mimercado.feature.products.ProductListScreen
@@ -29,6 +32,9 @@ fun NavGraphBuilder.productsGraph(
             onAddToCart = onAddToCart,
             onProductClick = { product ->
                 navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id)))
+            },
+            onCreateCustomProductClick = {
+                navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute()))
             }
         )
     }
@@ -38,6 +44,14 @@ fun NavGraphBuilder.productsGraph(
         ProductDetailsScreen(
             viewModel = viewModel,
             onAddToCart = onAddToCart,
+            onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
+        )
+    }
+
+    composable<CreateCustomProductRoute> {
+        val viewModel: CreateCustomProductViewModel = hiltViewModel()
+        CreateCustomProductScreen(
+            viewModel = viewModel,
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
         )
     }

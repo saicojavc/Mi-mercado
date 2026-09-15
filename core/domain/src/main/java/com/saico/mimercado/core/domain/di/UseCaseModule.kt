@@ -1,6 +1,7 @@
 package com.saico.mimercado.core.domain.di
 
 import com.saico.mimercado.core.domain.repository.FavoriteRepository
+import com.saico.mimercado.core.domain.repository.ImageSearchRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
 import com.saico.mimercado.core.domain.usecase.products.*
 import dagger.Module
@@ -17,14 +18,17 @@ object UseCaseModule {
     @Singleton
     fun provideProductsUseCases(
         productRepository: ProductRepository,
-        favoriteRepository: FavoriteRepository
+        favoriteRepository: FavoriteRepository,
+        imageSearchRepository: ImageSearchRepository
     ): ProductsUseCases {
         return ProductsUseCases(
             getProducts = GetProductsUseCase(productRepository),
             getProductDetails = GetProductDetailsUseCase(productRepository),
             toggleFavorite = ToggleFavoriteUseCase(favoriteRepository),
             getFavorites = GetFavoritesUseCase(favoriteRepository),
-            isFavorite = IsFavoriteUseCase(favoriteRepository)
+            isFavorite = IsFavoriteUseCase(favoriteRepository),
+            createCustomProduct = CreateCustomProductUseCase(favoriteRepository),
+            searchProductImages = SearchProductImagesUseCase(imageSearchRepository)
         )
     }
 }

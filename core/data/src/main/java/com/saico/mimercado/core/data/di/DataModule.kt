@@ -2,9 +2,11 @@ package com.saico.mimercado.core.data.di
 
 import com.saico.mimercado.core.data.repository.FavoriteRepositoryImpl
 import com.saico.mimercado.core.data.repository.FirestoreCartRepository
+import com.saico.mimercado.core.data.repository.ImageSearchRepositoryImpl
 import com.saico.mimercado.core.data.repository.ProductRepositoryImpl
 import com.saico.mimercado.core.domain.repository.CartRepository
 import com.saico.mimercado.core.domain.repository.FavoriteRepository
+import com.saico.mimercado.core.domain.repository.ImageSearchRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -15,6 +17,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindImageSearchRepository(
+        imageSearchRepositoryImpl: ImageSearchRepositoryImpl
+    ): ImageSearchRepository
 
     @Binds
     @Singleton

@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -56,6 +57,7 @@ fun ProductListScreen(
     errorMessages: SharedFlow<String>,
     onAddToCart: (Product) -> Unit,
     onProductClick: (Product) -> Unit,
+    onCreateCustomProductClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -118,7 +120,39 @@ fun ProductListScreen(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = AppBackground,
                         titleContentColor = TextDark
-                    )
+                    ),
+                    actions = {
+                        if (uiState.listMode == ListMode.HABITUAL) {
+                            IconButton(onClick = onCreateCustomProductClick) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Añadir Producto Personalizado",
+                                    tint = PrimaryCyan
+                                )
+                            }
+                        }
+                        IconButton(onClick = { viewModel.navigateToCart() }) {
+                            BadgedBox(
+                                badge = {
+                                    if (totalCartItems > 0) {
+                                        Badge(
+                                            modifier = Modifier.scale(badgeScale.value),
+                                            containerColor = MaterialTheme.colorScheme.error,
+                                            contentColor = MaterialTheme.colorScheme.onError
+                                        ) {
+                                            Text(totalCartItems.toString())
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = stringResource(R.string.view_cart),
+                                    tint = PrimaryCyan
+                                )
+                            }
+                        }
+                    }
                 )
                 
                 SecondaryTabRow(
@@ -139,32 +173,7 @@ fun ProductListScreen(
                 }
             }
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.navigateToCart() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                BadgedBox(
-                    badge = {
-                        if (totalCartItems > 0) {
-                            Badge(
-                                modifier = Modifier.scale(badgeScale.value),
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ) {
-                                Text(totalCartItems.toString())
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = stringResource(R.string.view_cart)
-                    )
-                }
-            }
-        }
+        floatingActionButton = {}
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             

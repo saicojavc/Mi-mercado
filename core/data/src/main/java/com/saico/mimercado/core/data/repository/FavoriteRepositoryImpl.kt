@@ -15,4 +15,6 @@ class FavoriteRepositoryImpl @Inject constructor(
     override suspend fun toggleFavorite(product: Product) = remoteDataSource.toggleFavorite(product)
 
     override fun isFavorite(productId: String): Flow<Boolean> = remoteDataSource.isFavorite(productId)
+
+    override suspend fun saveCustomProduct(product: Product) = remoteDataSource.saveCustomProduct(product)
 }

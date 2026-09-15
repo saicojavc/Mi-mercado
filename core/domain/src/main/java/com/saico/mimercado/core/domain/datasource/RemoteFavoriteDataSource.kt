@@ -7,4 +7,5 @@ interface RemoteFavoriteDataSource {
     fun getFavorites(): Flow<List<Product>>
     suspend fun toggleFavorite(product: Product)
     fun isFavorite(productId: String): Flow<Boolean>
+    suspend fun saveCustomProduct(product: Product)
 }
