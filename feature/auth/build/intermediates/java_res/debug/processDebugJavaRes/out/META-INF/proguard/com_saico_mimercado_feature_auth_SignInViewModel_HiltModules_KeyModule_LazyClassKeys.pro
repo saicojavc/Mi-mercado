@@ -1,0 +1,1 @@
+-keep,allowobfuscation,allowshrinking class com.saico.mimercado.feature.auth.SignInViewModel

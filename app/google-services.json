@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "468440647882",
+    "firebase_url": "https://com-saico-mimercado-e7ca2-default-rtdb.firebaseio.com",
     "project_id": "com-saico-mimercado-e7ca2",
     "storage_bucket": "com-saico-mimercado-e7ca2.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.saico.mimercado"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "468440647882-3sk2mug3lcnvuvmsfkmpu0vb4g2kuflt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saico.mimercado",
+            "certificate_hash": "91283061ec2366b25f0cf5b3dff887c93146dd53"
+          }
+        },
+        {
+          "client_id": "468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAkOIM5QeNIMjxwKXrwRdn3IP76IkWEtSk"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

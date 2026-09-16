@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Mi Mercado Core UI</string>
     <string name="add_to_cart">Añadir al carrito</string>
+    <string name="default_web_client_id">468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com</string>
 </resources>

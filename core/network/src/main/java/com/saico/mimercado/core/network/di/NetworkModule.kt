@@ -1,5 +1,6 @@
 package com.saico.mimercado.core.network.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.saico.mimercado.core.network.api.OffApiService
 import com.saico.mimercado.core.network.api.USDAFoodDataService
@@ -23,6 +24,12 @@ object NetworkModule {
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 
     @Provides

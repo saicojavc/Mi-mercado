@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -58,6 +59,7 @@ fun ProductListScreen(
     onAddToCart: (Product) -> Unit,
     onProductClick: (Product) -> Unit,
     onCreateCustomProductClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -128,6 +130,13 @@ fun ProductListScreen(
                                     tint = PrimaryCyan
                                 )
                             }
+                        }
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Ajustes del Hogar",
+                                tint = PrimaryCyan
+                            )
                         }
                         IconButton(onClick = { viewModel.navigateToCart() }) {
                             BadgedBox(

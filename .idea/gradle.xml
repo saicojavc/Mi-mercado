@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/core/network" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/auth" />
             <option value="$PROJECT_DIR$/feature/cart" />
             <option value="$PROJECT_DIR$/feature/products" />
             <option value="$PROJECT_DIR$/feature/search" />

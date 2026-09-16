@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
+import com.saico.mimercado.core.ui.navigation.routes.household.HouseholdSettingsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
@@ -35,6 +36,9 @@ fun NavGraphBuilder.productsGraph(
             },
             onCreateCustomProductClick = {
                 navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute()))
+            },
+            onSettingsClick = {
+                navigator.navigate(NavigationCommand.NavigateTo(HouseholdSettingsRoute))
             }
         )
     }
@@ -55,4 +59,7 @@ fun NavGraphBuilder.productsGraph(
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
         )
     }
+
+    // Removida la declaración duplicada de HouseholdSettingsRoute.
+    // Ahora es administrada de forma centralizada por el nuevo módulo :feature:settings
 }

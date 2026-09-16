@@ -1,13 +1,21 @@
 package com.saico.mimercado.core.data.di
 
+import com.saico.mimercado.core.data.repository.AuthRepositoryImpl
 import com.saico.mimercado.core.data.repository.FavoriteRepositoryImpl
 import com.saico.mimercado.core.data.repository.FirestoreCartRepository
+import com.saico.mimercado.core.data.repository.HouseholdRepositoryImpl
 import com.saico.mimercado.core.data.repository.ImageSearchRepositoryImpl
 import com.saico.mimercado.core.data.repository.ProductRepositoryImpl
+import com.saico.mimercado.core.data.repository.UserRepositoryImpl
+import com.saico.mimercado.core.data.repository.InvitationRepositoryImpl
+import com.saico.mimercado.core.domain.repository.AuthRepository
 import com.saico.mimercado.core.domain.repository.CartRepository
 import com.saico.mimercado.core.domain.repository.FavoriteRepository
+import com.saico.mimercado.core.domain.repository.HouseholdRepository
 import com.saico.mimercado.core.domain.repository.ImageSearchRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
+import com.saico.mimercado.core.domain.repository.UserRepository
+import com.saico.mimercado.core.domain.repository.InvitationRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,6 +25,30 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(
+        userRepositoryImpl: UserRepositoryImpl
+    ): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHouseholdRepository(
+        householdRepositoryImpl: HouseholdRepositoryImpl
+    ): HouseholdRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInvitationRepository(
+        invitationRepositoryImpl: InvitationRepositoryImpl
+    ): InvitationRepository
 
     @Binds
     @Singleton

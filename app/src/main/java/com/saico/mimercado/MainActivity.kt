@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,10 +31,12 @@ import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
 import com.saico.mimercado.core.ui.navigation.routes.Route
 import com.saico.mimercado.core.ui.theme.MiMercadoTheme
+import com.saico.mimercado.feature.auth.navigation.authGraph
 import com.saico.mimercado.feature.cart.CartViewModel
 import com.saico.mimercado.feature.cart.navigation.cartGraph
 import com.saico.mimercado.feature.products.navigation.productsGraph
 import com.saico.mimercado.feature.search.navigation.searchGraph
+import com.saico.mimercado.feature.settings.navigation.settingsGraph
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -50,7 +53,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Dynamic permission check on Android 13+
         if (Build.VERSION.SDK_INT >= 33) {
             val requestPermissionLauncher = registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -66,9 +68,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Initialize device token registration on startup
         checkGooglePlayServices()
-        fcmManager.registerDeviceToken()
 
         setContent {
             MiMercadoTheme(darkTheme = viewModel.isDarkMode.value) {
@@ -79,11 +79,23 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainContainer(
-                        navController = navController,
-                        startDestination = viewModel.firstScreen,
-                        navigator = navigator
-                    )
+                    val startDestination by viewModel.startDestination.collectAsState()
+                    
+                    LaunchedEffect(startDestination) {
+                        startDestination?.let { destination ->
+                            navController.navigate(destination) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
+
+                    if (startDestination != null) {
+                        MainContainer(
+                            navController = navController,
+                            startDestination = startDestination!!,
+                            navigator = navigator
+                        )
+                    }
                 }
             }
         }
@@ -116,6 +128,10 @@ private fun MainContainer(
         navController = navController,
         startDestination = startDestination
     ) {
+        authGraph(
+            onSignInSuccess = {},
+            fcmManager = (navController.context as MainActivity).fcmManager
+        )
         productsGraph(
             totalCartItems = totalItems,
             errorMessages = cartViewModel.errorMessages,
@@ -123,6 +139,7 @@ private fun MainContainer(
             navigator = navigator
         )
         searchGraph(navigator = navigator)
+        settingsGraph(navigator = navigator)
         cartGraph()
     }
 }

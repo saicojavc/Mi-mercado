@@ -8,6 +8,13 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <queries>
+        <package android:name="com.google.android.gms" />
+        <intent>
+            <action android:name="com.google.android.gms.auth.api.signin.SERVICE_CONFIG_CONTROL" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MiMercadoApp"
         android:allowBackup="true"

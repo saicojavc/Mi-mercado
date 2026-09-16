@@ -1,0 +1,9 @@
+com.saico.mimercado.feature.auth-pngs-0 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\generated\res\pngs\debug
+com.saico.mimercado.feature.auth-updated_navigation_xml-1 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\generated\updated_navigation_xml\debug
+com.saico.mimercado.feature.auth-mergeDebugResources-2 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+com.saico.mimercado.feature.auth-mergeDebugResources-3 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+com.saico.mimercado.feature.auth-debug-4 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\intermediates\merged_res\debug\mergeDebugResources
+com.saico.mimercado.feature.auth-debug-5 D:\Jorgito\Proyects\Mi-mercado\feature\auth\build\intermediates\packaged_res\debug\packageDebugResources
+com.saico.mimercado.feature.auth-debug-6 D:\Jorgito\Proyects\Mi-mercado\feature\auth\src\debug\res
+com.saico.mimercado.feature.auth-main-7 D:\Jorgito\Proyects\Mi-mercado\feature\auth\src\main\res
+gradleHome-0 C:\Users\arian\.gradle

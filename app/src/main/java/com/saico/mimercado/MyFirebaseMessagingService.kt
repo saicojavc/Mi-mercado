@@ -11,7 +11,9 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.saico.mimercado.core.common.UserProvider
@@ -36,38 +38,35 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "Mi Mercado"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: "Nuevo mensaje"
 
-        // Show standard notification in status bar
         sendNotification(title, body)
 
-        // Show Toast if app is in foreground
         Handler(Looper.getMainLooper()).post {
             Toast.makeText(applicationContext, "$title: $body", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun sendTokenToServer(token: String) {
-        val userId = userProvider.getUserId()
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val firestore = FirebaseFirestore.getInstance()
 
-        Log.d("FCMService", "🔍 sendTokenToServer START")
-        Log.d("FCMService", "   userId: $userId")
-        Log.d("FCMService", "   token: ${token.substring(0, 20)}...") // Primeros 20 chars
+        firestore.collection("users").document(uid).get().addOnSuccessListener { userSnapshot ->
+            val householdId = userSnapshot.getString("householdId") ?: "familia_valdes"
 
-        val userRef = firestore.collection("households").document("familia_valdes")
-            .collection("users").document(userId)
+            val userRef = firestore.collection("households").document(householdId)
+                .collection("users").document(uid)
 
-        userRef.update("deviceToken", token)
-            .addOnSuccessListener {
-                Log.d("FCMService", "✅ Token updated in Firestore")
-            }
-            .addOnFailureListener { e ->
-                Log.d("FCMService", "⚠️ Update failed, creating new document")
-                userRef.set(mapOf(
-                    "deviceToken" to token,
-                    "lastSeen" to System.currentTimeMillis()
-                ))
-                Log.d("FCMService", "✅ New user document created")
-            }
+            userRef.update("deviceToken", token)
+                .addOnSuccessListener {
+                    Log.d("FCMService", "✅ Token updated in Firestore for household $householdId")
+                }
+                .addOnFailureListener { e ->
+                    Log.d("FCMService", "⚠️ Update failed, creating or merging document")
+                    userRef.set(mapOf(
+                        "deviceToken" to token,
+                        "lastSeen" to System.currentTimeMillis()
+                    ), SetOptions.merge())
+                }
+        }
     }
 
     private fun sendNotification(title: String, messageBody: String) {
@@ -89,7 +88,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
