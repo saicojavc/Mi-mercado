@@ -77,6 +77,17 @@ class FirestoreCartRepository @Inject constructor(
             .document(householdId)
             .collection("cart")
 
+        // Obtener info del miembro actual para persistirla en el item del carrito
+        val memberSnapshot = firestore.collection("households")
+            .document(householdId)
+            .collection("members")
+            .document(userId)
+            .get()
+            .await()
+
+        val memberAvatar = memberSnapshot.getString("avatarIcon") ?: "fox"
+        val memberName = memberSnapshot.getString("displayName") ?: "Miembro"
+
         val productIdPrefix = "${product.id}_"
         val snapshot = cartCollection
             .whereEqualTo("addedBy", userId)
@@ -97,7 +108,9 @@ class FirestoreCartRepository @Inject constructor(
                 categoria = product.categoria,
                 cantidad = 1,
                 timestamp = System.currentTimeMillis(),
-                addedBy = userId
+                addedBy = userId,
+                addedByAvatar = memberAvatar,
+                addedByDisplayName = memberName
             )
             cartCollection.document(newItemId).set(cartItem).await()
         }

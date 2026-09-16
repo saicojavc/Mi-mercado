@@ -1,6 +1,7 @@
 package com.saico.mimercado.feature.cart
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +36,8 @@ import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.getCategoryColor
 import com.saico.mimercado.feature.cart.model.CartUiEvent
 import kotlinx.coroutines.flow.collectLatest
+
+import com.saico.mimercado.core.ui.util.AvatarUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,7 +210,6 @@ fun CartItemRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Franja de acento por categoría lateral elegante alineada a las tarjetas de producto
             Box(
                 modifier = Modifier
                     .width(6.dp)
@@ -222,35 +224,58 @@ fun CartItemRow(
                     .weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    modifier = Modifier.size(64.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    if (item.imageUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(item.imageUrl)
-                                .crossfade(true)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .build(),
-                            contentDescription = item.nombre,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
+                // Imagen del Producto con Insignia de Avatar de Usuario
+                Box {
+                    Surface(
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        if (item.imageUrl.isNotEmpty()) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(item.imageUrl)
+                                    .crossfade(true)
+                                    .diskCachePolicy(CachePolicy.ENABLED)
+                                    .build(),
+                                contentDescription = item.nombre,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = null,
+                                    tint = Color.LightGray,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Avatar del usuario que agregó el producto (Bottom End overlap)
+                    Surface(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 6.dp, y = 6.dp),
+                        shape = CircleShape,
+                        color = Color.White,
+                        tonalElevation = 4.dp,
+                        shadowElevation = 2.dp,
+                        border = BorderStroke(1.dp, Color.LightGray)
+                    ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = null,
-                                tint = Color.LightGray,
-                                modifier = Modifier.size(28.dp)
+                            Text(
+                                text = AvatarUtils.getAvatarEmoji(item.addedByAvatar),
+                                fontSize = 16.sp
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(18.dp)) // Más espacio para no tapar con la insignia
 
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
@@ -315,6 +340,15 @@ fun CartItemRow(
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                        
+                        // Nombre resumido de quien agregó (Opcional, para mayor claridad)
+                        item.addedByDisplayName?.let { name ->
+                            Text(
+                                text = "por ${name.take(8)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
                             )
                         }
                     }

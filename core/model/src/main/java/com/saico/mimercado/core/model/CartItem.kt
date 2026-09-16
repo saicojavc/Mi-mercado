@@ -12,5 +12,7 @@ data class CartItem(
     var categoria: String = "",
     var cantidad: Int = 0,
     var timestamp: Long = System.currentTimeMillis(),
-    var addedBy: String = ""
+    var addedBy: String = "",
+    var addedByAvatar: String? = null,
+    var addedByDisplayName: String? = null
 )
