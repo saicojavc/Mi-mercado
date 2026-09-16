@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "468440647882-9ij4bh2prgagaot72bisuqjp9r5f9u6s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saico.mimercado",
+            "certificate_hash": "be31e5c72f4abec1e38149bde9e6b8f3d4bf984e"
+          }
+        },
+        {
           "client_id": "468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com",
           "client_type": 3
         }
