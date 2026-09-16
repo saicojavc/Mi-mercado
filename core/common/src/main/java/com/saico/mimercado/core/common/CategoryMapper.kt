@@ -47,4 +47,19 @@ object CategoryMapper {
             else -> combined.contains(english) || combined.contains(uiLabel.lowercase())
         }
     }
+
+    /**
+     * Normalizes any raw category string into one of our UI categories.
+     */
+    fun getNormalizedCategory(rawCategory: String, productName: String = ""): String {
+        val uiCategories = listOf("Lácteos", "Panadería", "Carnes", "Frutas y verduras", "Despensa", "Limpieza", "Bebidas")
+        
+        for (uiCategory in uiCategories) {
+            if (matchesSmart(rawCategory, productName, uiCategory)) {
+                return uiCategory
+            }
+        }
+        
+        return "Despensa" // Fallback seguro
+    }
 }

@@ -32,11 +32,11 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.saico.mimercado.core.model.CartItem
+import com.saico.mimercado.core.common.CategoryMapper
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.getCategoryColor
 import com.saico.mimercado.feature.cart.model.CartUiEvent
 import kotlinx.coroutines.flow.collectLatest
-
 import com.saico.mimercado.core.ui.util.AvatarUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,7 +195,10 @@ fun CartItemRow(
     item: CartItem,
     onRemove: () -> Unit
 ) {
-    val categoryColor = remember(item.categoria) { getCategoryColor(item.categoria) }
+    val normalizedCategory = remember(item.categoria, item.nombre) {
+        CategoryMapper.getNormalizedCategory(item.categoria, item.nombre)
+    }
+    val categoryColor = remember(normalizedCategory) { getCategoryColor(normalizedCategory) }
     val isCustom = remember(item.brands) { item.brands.contains("Personalizado", ignoreCase = true) }
 
     Card(
@@ -324,7 +327,7 @@ fun CartItemRow(
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                text = item.categoria,
+                                text = normalizedCategory,
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = categoryColor,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
