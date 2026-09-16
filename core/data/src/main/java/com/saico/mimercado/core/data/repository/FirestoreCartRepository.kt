@@ -55,7 +55,7 @@ class FirestoreCartRepository @Inject constructor(
                 .collection("cart")
                 .addSnapshotListener { snapshot, e ->
                     if (e != null) {
-                        close(e)
+                        trySend(emptyList()) // Evitar que el flujo se cuelgue ante errores de permisos
                         return@addSnapshotListener
                     }
                     if (snapshot != null) {

@@ -6,7 +6,7 @@ import com.saico.mimercado.core.domain.repository.HouseholdRepository
 import com.saico.mimercado.core.domain.repository.ImageSearchRepository
 import com.saico.mimercado.core.domain.repository.ProductRepository
 import com.saico.mimercado.core.domain.repository.UserRepository
-import com.saico.mimercado.core.domain.repository.InvitationRepository
+import com.saico.mimercado.core.domain.repository.JoinCodeRepository
 import com.saico.mimercado.core.domain.usecase.auth.*
 import com.saico.mimercado.core.domain.usecase.household.*
 import com.saico.mimercado.core.domain.usecase.products.*
@@ -55,16 +55,16 @@ object UseCaseModule {
     fun provideHouseholdUseCases(
         householdRepository: HouseholdRepository,
         userRepository: UserRepository,
-        invitationRepository: InvitationRepository
+        joinCodeRepository: JoinCodeRepository
     ): HouseholdUseCases {
         return HouseholdUseCases(
             createHousehold = CreateHouseholdUseCase(householdRepository, userRepository),
+            observeHousehold = ObserveHouseholdUseCase(householdRepository),
             observeMembers = ObserveHouseholdMembersUseCase(householdRepository),
             updateMemberRole = UpdateMemberRoleUseCase(householdRepository),
             updateMemberAvatar = UpdateMemberAvatarUseCase(householdRepository),
-            sendInvitation = SendHouseholdInvitationUseCase(invitationRepository),
-            observePendingInvitations = ObservePendingInvitationsUseCase(invitationRepository),
-            acceptInvitation = AcceptHouseholdInvitationUseCase(invitationRepository, userRepository)
+            joinHouseholdByCode = JoinHouseholdByCodeUseCase(joinCodeRepository, userRepository),
+            regenerateJoinCode = RegenerateJoinCodeUseCase(householdRepository)
         )
     }
 }

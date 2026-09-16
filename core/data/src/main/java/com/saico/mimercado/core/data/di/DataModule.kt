@@ -7,15 +7,8 @@ import com.saico.mimercado.core.data.repository.HouseholdRepositoryImpl
 import com.saico.mimercado.core.data.repository.ImageSearchRepositoryImpl
 import com.saico.mimercado.core.data.repository.ProductRepositoryImpl
 import com.saico.mimercado.core.data.repository.UserRepositoryImpl
-import com.saico.mimercado.core.data.repository.InvitationRepositoryImpl
-import com.saico.mimercado.core.domain.repository.AuthRepository
-import com.saico.mimercado.core.domain.repository.CartRepository
-import com.saico.mimercado.core.domain.repository.FavoriteRepository
-import com.saico.mimercado.core.domain.repository.HouseholdRepository
-import com.saico.mimercado.core.domain.repository.ImageSearchRepository
-import com.saico.mimercado.core.domain.repository.ProductRepository
-import com.saico.mimercado.core.domain.repository.UserRepository
-import com.saico.mimercado.core.domain.repository.InvitationRepository
+import com.saico.mimercado.core.data.repository.JoinCodeRepositoryImpl
+import com.saico.mimercado.core.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -46,9 +39,9 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindInvitationRepository(
-        invitationRepositoryImpl: InvitationRepositoryImpl
-    ): InvitationRepository
+    abstract fun bindJoinCodeRepository(
+        joinCodeRepositoryImpl: JoinCodeRepositoryImpl
+    ): JoinCodeRepository
 
     @Binds
     @Singleton
