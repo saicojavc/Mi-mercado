@@ -17,6 +17,16 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.saico.mimercado.core.ui.R
 import kotlinx.coroutines.launch
 
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.ui.res.painterResource
+
 @Composable
 fun SignInScreen(
     viewModel: SignInViewModel,
@@ -32,65 +42,144 @@ fun SignInScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(24.dp)
     ) {
-        Text("Bienvenido a Mi Mercado", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(32.dp))
-        
-        if (uiState.error != null) {
-            Text(uiState.error!!, color = Color.Red, modifier = Modifier.padding(bottom = 16.dp))
+        // Centro: Logo y Bienvenida
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Surface(
+                modifier = Modifier.size(120.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                // Intentamos usar el icono de la app si está disponible en app module, 
+                // pero como estamos en feature:auth, usaremos un icono genérico elegante
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            
+            Spacer(Modifier.height(24.dp))
+            
+            Text(
+                text = "Mi Mercado",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            
+            Text(
+                text = "Tu despensa inteligente y compartida",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
         }
 
-        Button(
-            onClick = {
-                val credentialManager = CredentialManager.create(context)
-                val googleIdOption = GetGoogleIdOption.Builder()
-                    .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(context.getString(R.string.default_web_client_id))
-                    .setAutoSelectEnabled(true)
-                    .build()
+        // Parte inferior: Botón de Login y Errores
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (uiState.error != null) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = uiState.error!!,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
 
-                val request = GetCredentialRequest.Builder()
-                    .addCredentialOption(googleIdOption)
-                    .build()
+            Button(
+                onClick = {
+                    val credentialManager = CredentialManager.create(context)
+                    val googleIdOption = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(context.getString(R.string.default_web_client_id))
+                        .setAutoSelectEnabled(true)
+                        .build()
 
-                scope.launch {
-                    try {
-                        Log.d("SignIn", "🚀 Iniciando getCredential...")
-                        val result = credentialManager.getCredential(context, request)
-                        val credential = result.credential
-                        
-                        Log.d("SignIn", "✉️ Credencial obtenida tipo: ${credential::class.java.name}")
-                        
-                        if (credential is GoogleIdTokenCredential) {
-                            Log.d("SignIn", "✅ Credencial es GoogleIdTokenCredential de forma nativa")
-                            viewModel.onGoogleSignInResult(credential.idToken)
-                        } else {
-                            // Intentar parsear de forma explícita si llega envuelta en CustomCredential o similar
-                            try {
-                                val idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
-                                Log.d("SignIn", "✅ Token extraído exitosamente usando createFrom(credential.data)")
-                                viewModel.onGoogleSignInResult(idToken)
-                            } catch (parseException: Exception) {
-                                Log.e("SignIn", "❌ No se pudo extraer GoogleIdToken del tipo de credencial recibido: ${parseException.message}")
+                    val request = GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                    scope.launch {
+                        try {
+                            Log.d("SignIn", "🚀 Iniciando getCredential...")
+                            val result = credentialManager.getCredential(context, request)
+                            val credential = result.credential
+                            
+                            if (credential is GoogleIdTokenCredential) {
+                                viewModel.onGoogleSignInResult(credential.idToken)
+                            } else {
+                                try {
+                                    val idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
+                                    viewModel.onGoogleSignInResult(idToken)
+                                } catch (e: Exception) {
+                                    Log.e("SignIn", "❌ Error al extraer token: ${e.message}")
+                                }
+                            }
+                        } catch (e: GetCredentialException) {
+                            Log.e("SignIn", "❌ getCredential falló: ${e::class.simpleName}")
+                        } catch (e: Exception) {
+                            Log.e("SignIn", "❌ Falló: ${e.message}")
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                enabled = !uiState.isLoading,
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Icono "G" de Google estilizado con texto para máxima compatibilidad
+                        Surface(
+                            modifier = Modifier.size(24.dp),
+                            shape = CircleShape,
+                            color = Color.White
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    "G", 
+                                    color = Color(0xFF4285F4), 
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
                             }
                         }
-                    } catch (e: GetCredentialException) {
-                        Log.e("SignIn", "❌ getCredential falló: ${e::class.simpleName} - ${e.message}", e)
-                    } catch (e: Exception) {
-                        Log.e("SignIn", "❌ Falló después de obtener credencial: ${e.message}", e)
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            "Continuar con Google",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
-            },
-            enabled = !uiState.isLoading
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-            } else {
-                Text("Continuar con Google")
             }
         }
     }
