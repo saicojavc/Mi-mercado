@@ -33,6 +33,8 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.saico.mimercado.core.model.CartItem
 import com.saico.mimercado.core.common.CategoryMapper
+import com.saico.mimercado.core.common.UsdaImageResolver
+import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.getCategoryColor
 import com.saico.mimercado.feature.cart.model.CartUiEvent
@@ -201,6 +203,20 @@ fun CartItemRow(
     val categoryColor = remember(normalizedCategory) { getCategoryColor(normalizedCategory) }
     val isCustom = remember(item.brands) { item.brands.contains("Personalizado", ignoreCase = true) }
 
+    val upc = remember(item.upc) { item.upc.filter { it.isDigit() } }
+    val candidateUrls = remember(upc, item.imageUrl, item.nombre) {
+        val list = mutableListOf<String>()
+        if (item.imageUrl.isNotBlank()) list.add(item.imageUrl)
+        list.add(UsdaImageResolver.getSearchThumbnailUrl(item.brands, item.nombre))
+        if (upc.isNotEmpty()) {
+            val upc12 = upc.padStart(12, '0').takeLast(12)
+            list.add("https://i5.walmartimages.com/asr/$upc12.jpg")
+            list.add("https://target.scene7.com/is/image/Target/GUEST_$upc12?wid=400&hei=400&fmt=pjpeg")
+            list.add(UsdaImageResolver.buildOffUrl(upc))
+        }
+        list
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -229,33 +245,11 @@ fun CartItemRow(
             ) {
                 // Imagen del Producto con Insignia de Avatar de Usuario
                 Box {
-                    Surface(
-                        modifier = Modifier.size(64.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        if (item.imageUrl.isNotEmpty()) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(item.imageUrl)
-                                    .crossfade(true)
-                                    .diskCachePolicy(CachePolicy.ENABLED)
-                                    .build(),
-                                contentDescription = item.nombre,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.ShoppingCart,
-                                    contentDescription = null,
-                                    tint = Color.LightGray,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                    }
+                    ProductImage(
+                        candidateUrls = candidateUrls,
+                        productName = item.nombre,
+                        modifier = Modifier.size(64.dp)
+                    )
                     
                     // Avatar del usuario que agregó el producto (Bottom End overlap)
                     Surface(
@@ -346,14 +340,7 @@ fun CartItemRow(
                             )
                         }
                         
-                        // Nombre resumido de quien agregó (Opcional, para mayor claridad)
-                        item.addedByDisplayName?.let { name ->
-                            Text(
-                                text = "por ${name.take(8)}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.Gray
-                            )
-                        }
+
                     }
                 }
             }

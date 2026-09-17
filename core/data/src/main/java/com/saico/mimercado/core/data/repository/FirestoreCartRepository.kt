@@ -78,15 +78,24 @@ class FirestoreCartRepository @Inject constructor(
             .collection("cart")
 
         // Obtener info del miembro actual para persistirla en el item del carrito
-        val memberSnapshot = firestore.collection("households")
-            .document(householdId)
-            .collection("members")
-            .document(userId)
-            .get()
-            .await()
+        var memberAvatar = "fox"
+        var memberName = "Miembro"
+        
+        try {
+            val memberSnapshot = firestore.collection("households")
+                .document(householdId)
+                .collection("members")
+                .document(userId)
+                .get()
+                .await()
 
-        val memberAvatar = memberSnapshot.getString("avatarIcon") ?: "fox"
-        val memberName = memberSnapshot.getString("displayName") ?: "Miembro"
+            if (memberSnapshot.exists()) {
+                memberAvatar = memberSnapshot.getString("avatarIcon") ?: "fox"
+                memberName = memberSnapshot.getString("displayName") ?: "Miembro"
+            }
+        } catch (e: Exception) {
+            // Fallback silencioso a valores por defecto si falla la lectura del miembro
+        }
 
         val productIdPrefix = "${product.id}_"
         val snapshot = cartCollection

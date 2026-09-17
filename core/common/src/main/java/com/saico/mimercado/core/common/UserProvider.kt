@@ -1,6 +1,7 @@
 package com.saico.mimercado.core.common
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
@@ -16,6 +17,12 @@ class UserProvider @Inject constructor(
     }
 
     fun getUserId(): String {
+        // Preferimos el UID de Firebase si existe sesión activa
+        val firebaseUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (!firebaseUid.isNullOrEmpty()) {
+            return firebaseUid
+        }
+
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         var userId = sharedPreferences.getString(KEY_USER_ID, null)
         if (userId.isNullOrEmpty()) {
