@@ -32,10 +32,11 @@ fun NavGraphBuilder.productsGraph(
             errorMessages = errorMessages,
             onAddToCart = onAddToCart,
             onProductClick = { product ->
-                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id)))
+                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id, product.isCustom)))
             },
             onCreateCustomProductClick = {
-                navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute()))
+                val query = viewModel.uiState.value.searchQuery
+                navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute(prefillName = query.ifBlank { null })))
             },
             onSettingsClick = {
                 navigator.navigate(NavigationCommand.NavigateTo(HouseholdSettingsRoute))
@@ -48,6 +49,9 @@ fun NavGraphBuilder.productsGraph(
         ProductDetailsScreen(
             viewModel = viewModel,
             onAddToCart = onAddToCart,
+            onEditClick = { productId ->
+                navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute(editingProductId = productId)))
+            },
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
         )
     }

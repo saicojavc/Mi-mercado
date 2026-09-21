@@ -9,12 +9,17 @@ data object ProductsRoute : Route {
 }
 
 @Serializable
-data class ProductDetailsRoute(val fdcId: String) : Route {
-    override val route: String = "product_details/$fdcId"
+data class ProductDetailsRoute(
+    val fdcId: String,
+    val isCustom: Boolean = false
+) : Route {
+    override val route: String = "product_details/$fdcId?isCustom=$isCustom"
 }
 
 @Serializable
-data class CreateCustomProductRoute(val prefillName: String? = null) : Route {
+data class CreateCustomProductRoute(
+    val prefillName: String? = null,
+    val editingProductId: String? = null
+) : Route {
     override val route: String = "create_custom_product"
 }
-

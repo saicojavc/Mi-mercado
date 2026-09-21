@@ -2,10 +2,12 @@ package com.saico.mimercado.feature.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.saico.mimercado.core.common.ImageCacheManager
 import com.saico.mimercado.core.common.UserProvider
 import com.saico.mimercado.core.domain.usecase.cart.AddToCartUseCase
 import com.saico.mimercado.core.domain.usecase.products.GetProductsUseCase
 import com.saico.mimercado.core.model.Product
+import com.saico.mimercado.core.model.DecoratedProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val addToCartUseCase: AddToCartUseCase,
-    private val userProvider: UserProvider
+    private val userProvider: UserProvider,
+    val imageCache: ImageCacheManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -74,7 +77,17 @@ class SearchViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { products ->
-                    _uiState.update { it.copy(products = products, isLoading = false) }
+                    val decorated = products.groupBy { it.nombre.lowercase().trim() }
+                        .map { (_, group) ->
+                            val first = group.first()
+                            val distinctBrands = group.map { it.brands.lowercase().trim() }.distinct()
+                            DecoratedProduct(
+                                product = first,
+                                additionalBrandsCount = if (distinctBrands.size > 1) distinctBrands.size - 1 else 0
+                            )
+                        }
+                    // For SearchUiState, we now store List<DecoratedProduct>
+                    _uiState.update { it.copy(products = decorated, isLoading = false) }
                 },
                 onFailure = { error ->
                     _uiState.update { it.copy(error = error.message, isLoading = false) }
@@ -87,7 +100,6 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = userProvider.getUserId()
             addToCartUseCase(product, userId)
-            // Aquí se podría emitir un evento de éxito si fuera necesario
         }
     }
 }

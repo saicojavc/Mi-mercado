@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -20,26 +18,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.saico.mimercado.core.model.CartItem
-import com.saico.mimercado.core.common.CategoryMapper
-import com.saico.mimercado.core.common.UsdaImageResolver
-import com.saico.mimercado.core.ui.components.ProductImage
+import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.theme.AppBackground
-import com.saico.mimercado.core.ui.theme.getCategoryColor
+import com.saico.mimercado.core.ui.util.AvatarUtils
 import com.saico.mimercado.feature.cart.model.CartUiEvent
 import kotlinx.coroutines.flow.collectLatest
-import com.saico.mimercado.core.ui.util.AvatarUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +105,7 @@ fun CartScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) {
                             Text("Confirmar Compra", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
@@ -136,44 +126,7 @@ fun CartScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else if (uiState.items.isEmpty()) {
-                // CartEmptyState unificado y estilizado
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Surface(
-                        modifier = Modifier.size(96.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Tu carrito está vacío",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Los artículos que agregues junto a tu familia aparecerán aquí en tiempo real.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                CartEmptyState(Modifier.align(Alignment.Center))
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -183,6 +136,7 @@ fun CartScreen(
                     items(uiState.items, key = { it.itemId }) { item ->
                         CartItemRow(
                             item = item,
+                            viewModel = viewModel,
                             onRemove = { viewModel.removeFromCart(item) }
                         )
                     }
@@ -193,158 +147,90 @@ fun CartScreen(
 }
 
 @Composable
+private fun CartEmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            modifier = Modifier.size(96.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Tu carrito está vacío",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Los artículos que agregues junto a tu familia aparecerán aquí en tiempo real.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
 fun CartItemRow(
     item: CartItem,
+    viewModel: CartViewModel,
     onRemove: () -> Unit
 ) {
-    val normalizedCategory = remember(item.categoria, item.nombre) {
-        CategoryMapper.getNormalizedCategory(item.categoria, item.nombre)
-    }
-    val categoryColor = remember(normalizedCategory) { getCategoryColor(normalizedCategory) }
-    val isCustom = remember(item.brands) { item.brands.contains("Personalizado", ignoreCase = true) }
-
-    val upc = remember(item.upc) { item.upc.filter { it.isDigit() } }
-    val candidateUrls = remember(upc, item.imageUrl, item.nombre) {
-        val list = mutableListOf<String>()
-        if (item.imageUrl.isNotBlank()) list.add(item.imageUrl)
-        list.add(UsdaImageResolver.getSearchThumbnailUrl(item.brands, item.nombre))
-        if (upc.isNotEmpty()) {
-            val upc12 = upc.padStart(12, '0').takeLast(12)
-            list.add("https://i5.walmartimages.com/asr/$upc12.jpg")
-            list.add("https://target.scene7.com/is/image/Target/GUEST_$upc12?wid=400&hei=400&fmt=pjpeg")
-            list.add(UsdaImageResolver.buildOffUrl(upc))
-        }
-        list
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+    ProductCard(
+        product = item.toProduct(),
+        onClick = { },
+        onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
+        onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
+        avatarBadge = {
+            Surface(
                 modifier = Modifier
-                    .width(6.dp)
-                    .fillMaxHeight()
-                    .height(96.dp)
-                    .background(categoryColor)
-            )
-
-            Row(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .weight(1f),
-                verticalAlignment = Alignment.CenterVertically
+                    .size(28.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 6.dp, y = 6.dp),
+                shape = CircleShape,
+                color = Color.White,
+                tonalElevation = 4.dp,
+                shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, Color.LightGray)
             ) {
-                // Imagen del Producto con Insignia de Avatar de Usuario
-                Box {
-                    ProductImage(
-                        candidateUrls = candidateUrls,
-                        productName = item.nombre,
-                        modifier = Modifier.size(64.dp)
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = AvatarUtils.getAvatarEmoji(item.addedByAvatar),
+                        fontSize = 16.sp
                     )
-                    
-                    // Avatar del usuario que agregó el producto (Bottom End overlap)
-                    Surface(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .align(Alignment.BottomEnd)
-                            .offset(x = 6.dp, y = 6.dp),
-                        shape = CircleShape,
-                        color = Color.White,
-                        tonalElevation = 4.dp,
-                        shadowElevation = 2.dp,
-                        border = BorderStroke(1.dp, Color.LightGray)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = AvatarUtils.getAvatarEmoji(item.addedByAvatar),
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(18.dp)) // Más espacio para no tapar con la insignia
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = item.nombre,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        
-                        if (isCustom) {
-                            Surface(
-                                color = Color(0xFFF59E0B),
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Text(
-                                    text = "Personalizado",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                                    color = Color.White,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    if (item.brands.isNotEmpty()) {
-                        Text(
-                            text = item.brands,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.padding(top = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Surface(
-                            color = categoryColor.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = normalizedCategory,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = categoryColor,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = "Cant: ${item.cantidad}",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                        
-
-                    }
                 }
             }
-
+        },
+        subContent = {
+            Surface(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = MaterialTheme.shapes.extraSmall
+            ) {
+                Text(
+                    text = "Cant: ${item.cantidad}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+        },
+        trailingContent = {
             IconButton(
                 onClick = onRemove,
                 modifier = Modifier.padding(end = 8.dp)
@@ -356,5 +242,5 @@ fun CartItemRow(
                 )
             }
         }
-    }
+    )
 }

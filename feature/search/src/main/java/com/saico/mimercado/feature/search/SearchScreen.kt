@@ -14,13 +14,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
+import com.saico.mimercado.core.ui.navigation.Navigator
+import com.saico.mimercado.core.ui.navigation.NavigationCommand
+import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    navigator: Navigator,
     onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel()
@@ -62,16 +67,37 @@ fun SearchScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = uiState.error ?: "Error desconocido", color = Color.Red)
             }
+        } else if (uiState.products.isEmpty() && !uiState.isLoading) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "No se encontraron productos", color = Color.Gray)
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = { 
+                    navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute(prefillName = uiState.searchQuery.ifBlank { null })))
+                }) {
+                    Text("Añadir producto manualmente")
+                }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(uiState.products, key = { it.id }) { product ->
+                items(uiState.products, key = { it.product.id }) { decorated ->
                     ProductCard(
-                        product = product,
-                        onAddClick = { viewModel.onEvent(SearchUiEvent.AddToCart(product)) },
-                        onClick = { onProductClick(product.id) }
+                        product = decorated.product,
+                        onClick = { onProductClick(decorated.product.id) },
+                        additionalBrandsCount = decorated.additionalBrandsCount,
+                        onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
+                        onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
+                        trailingContent = {
+                            AddToCartButton(
+                                onClick = { viewModel.onEvent(SearchUiEvent.AddToCart(decorated.product)) }
+                            )
+                        }
                     )
                 }
             }

@@ -15,4 +15,14 @@ data class CartItem(
     var addedBy: String = "",
     var addedByAvatar: String? = null,
     var addedByDisplayName: String? = null
-)
+) {
+    fun toProduct() = Product(
+        id = itemId.substringBefore("_"),
+        upc = upc,
+        nombre = nombre,
+        brands = brands,
+        imageUrl = imageUrl,
+        categoria = categoria,
+        isCustom = brands.contains("Personalizado", ignoreCase = true)
+    )
+}

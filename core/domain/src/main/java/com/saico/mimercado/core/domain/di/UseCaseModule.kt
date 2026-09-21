@@ -34,6 +34,8 @@ object UseCaseModule {
             getFavorites = GetFavoritesUseCase(favoriteRepository),
             isFavorite = IsFavoriteUseCase(favoriteRepository),
             createCustomProduct = CreateCustomProductUseCase(favoriteRepository),
+            getCustomProduct = GetCustomProductUseCase(favoriteRepository),
+            deleteCustomProduct = DeleteCustomProductUseCase(favoriteRepository),
             searchProductImages = SearchProductImagesUseCase(imageSearchRepository)
         )
     }

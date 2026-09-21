@@ -1,13 +1,6 @@
 package com.saico.mimercado.core.data.di
 
-import com.saico.mimercado.core.data.repository.AuthRepositoryImpl
-import com.saico.mimercado.core.data.repository.FavoriteRepositoryImpl
-import com.saico.mimercado.core.data.repository.FirestoreCartRepository
-import com.saico.mimercado.core.data.repository.HouseholdRepositoryImpl
-import com.saico.mimercado.core.data.repository.ImageSearchRepositoryImpl
-import com.saico.mimercado.core.data.repository.ProductRepositoryImpl
-import com.saico.mimercado.core.data.repository.UserRepositoryImpl
-import com.saico.mimercado.core.data.repository.JoinCodeRepositoryImpl
+import com.saico.mimercado.core.data.repository.*
 import com.saico.mimercado.core.domain.repository.*
 import dagger.Binds
 import dagger.Module
