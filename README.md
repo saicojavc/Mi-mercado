@@ -1,63 +1,65 @@
 # Mi Mercado (FamilyCart)
 
-App de Android para que una familia gestione su lista de mercado de forma
-colaborativa: catálogo de productos (USDA FoodData Central + productos
-propios), carrito en tiempo real, y hogares formados por código de
-invitación.
+Android app for a family to manage their grocery list collaboratively:
+a product catalog (USDA FoodData Central + custom products), a real-time
+shared cart, and households formed via invite codes.
 
-> **Nota sobre este README:** combina lo confirmado por logs/pruebas reales
-> durante el desarrollo con lo reportado por una auditoría automatizada del
-> código. Donde no hay certeza total, lo marco explícitamente — ajústalo
-> según lo que el código realmente tenga en cada punto.
+> **Note on this README:** it combines what was confirmed through real
+> logs/testing during development with what an automated code audit
+> reported. Wherever there isn't full certainty, it's flagged explicitly
+> — adjust it to match what the code actually has at each point.
 
 ---
 
-## Stack técnico
+## Tech stack
 
-- **Kotlin + Jetpack Compose** (Material 3) para toda la UI.
-- **Arquitectura modular** (Clean Architecture, app/core/feature):
-  módulos confirmados vía Gradle: `app`, `feature:auth`, `feature:products`,
+- **Kotlin + Jetpack Compose** (Material 3) for the entire UI.
+- **Modular architecture** (Clean Architecture, app/core/feature):
+  modules confirmed via Gradle: `app`, `feature:auth`, `feature:products`,
   `feature:search`, `feature:cart`, `feature:settings`, `core:model`,
   `core:data`, `core:domain`, `core:ui`, `core:common`, `core:database`,
   `core:datastore`, `core:network`.
-- **Hilt** para inyección de dependencias.
-- **Navigation Compose** con rutas type-safe (objetos serializables).
-- **Firebase**: Authentication (Google Sign-In vía Credential Manager),
-  **Cloud Firestore** (no Realtime Database — confirmado), Cloud Messaging.
-- **Single-activity**, todas las pantallas como destinos de Compose.
+- **Hilt** for dependency injection.
+- **Navigation Compose** with type-safe routes (serializable objects).
+- **Firebase**: Authentication (Google Sign-In via Credential Manager),
+  **Cloud Firestore** (not Realtime Database — confirmed), Cloud
+  Messaging.
+- **Single-activity**, every screen is a Compose destination.
 
 ---
 
-## Funcionalidad actual
+## Current functionality
 
-### Autenticación y hogares
-- Login con Google usando `androidx.credentials` (Credential Manager) —
-  no la API `GoogleSignInClient` clásica, que Google dejó de recomendar.
-- Al iniciar sesión por primera vez, se crea automáticamente un perfil de
-  usuario **y** un hogar propio con un código de unión de 6 caracteres.
-- Un usuario pertenece a un solo hogar a la vez. Unirse a otro hogar con
-  su código transfiere la membresía (sale del anterior, entra al nuevo).
-- Roles por miembro: `ADULT` y `CHILD`. *(Nota: por ahora es una
-  restricción simple de permisos, no un flujo de sugerencia→aprobación
-  para menores — ver Roadmap.)*
-- Gestión de hogar (ver miembros, compartir/regenerar código, unirse a
-  otro) vive dentro de Ajustes, no como pantalla obligatoria al abrir la
-  app.
-- Avatares: set de 12 íconos de animales, elegibles por cada usuario.
+### Authentication and households
+- Google login using `androidx.credentials` (Credential Manager) — not
+  the classic `GoogleSignInClient` API, which Google no longer
+  recommends.
+- On first sign-in, a user profile is created automatically **and** a
+  household of the user's own, with a 6-character join code.
+- A user belongs to a single household at a time. Joining another
+  household with its code transfers membership (leaves the old one,
+  joins the new one).
+- Per-member roles: `ADULT` and `CHILD`. *(Note: for now this is a
+  simple permission restriction, not a suggest→approve flow for minors —
+  see Roadmap.)*
+- Household management (view members, share/regenerate the code, join
+  another) lives inside Settings, not as a mandatory screen on app
+  launch.
+- Avatars: a set of 12 animal icons, selectable by each user.
 
-### Catálogo y carrito
-- Dos vistas: **Habitual** (productos frecuentes/favoritos) y **Discover**
-  (búsqueda contra USDA FoodData Central).
-- Categorización con normalización de nombres en inglés/español.
-- **Productos personalizados**: se pueden crear productos que no existen
-  en USDA; quedan marcados como habituales de forma permanente.
-- **Escaneo de código de barras** para buscar productos por UPC.
-- Carrito colaborativo con sincronización en tiempo real vía Firestore;
-  cada item muestra quién lo agregó.
+### Catalog and cart
+- Two views: **Habitual** (frequent/favorite products) and **Discover**
+  (search against USDA FoodData Central).
+- Categorization with English/Spanish name normalization.
+- **Custom products**: products that don't exist in USDA can be created;
+  they're marked as permanently habitual.
+- **Barcode scanning** to look up products by UPC.
+- Collaborative cart with real-time sync via Firestore; each item shows
+  who added it.
 
 ---
 
-## Modelo de datos (Cloud Firestore)
+## Data model (Cloud Firestore)
 
 ```
 users/{uid}
@@ -73,82 +75,83 @@ households/{householdId}/cart/{itemId}
 households/{householdId}/favorites/{productId}
 
 joinCodes/{code}
-  householdId   // índice de búsqueda para unirse por código
+  householdId   // lookup index for joining by code
 ```
 
-Reglas de seguridad actuales (resumen): cada colección bajo un hogar exige
-pertenencia (`isMember()`, verificado contra `members/{uid}`); `members`
-solo se crea/borra a uno mismo (`request.auth.uid == uid`); `joinCodes`
-permite `get` por código exacto pero nunca `list` completo, para no
-exponer todos los códigos existentes.
+Current security rules (summary): every collection under a household
+requires membership (`isMember()`, checked against `members/{uid}`);
+`members` can only be created/deleted for oneself
+(`request.auth.uid == uid`); `joinCodes` allows `get` by exact code but
+never a full `list`, so all existing codes are never exposed.
 
-**Deuda técnica pendiente:** el registro de tokens de FCM por dispositivo
-vive hoy bajo `households/{id}/users`, con el mismo nombre de colección
-que el perfil de Auth en la raíz (`/users/{uid}`) — son cosas distintas
-con el mismo nombre. Renombrar a `fcmTokens` antes de que se acumule más
-código alrededor del nombre actual.
+**Pending technical debt:** per-device FCM token registration currently
+lives under `households/{id}/users`, sharing a collection name with the
+Auth profile at the root (`/users/{uid}`) — they're different things with
+the same name. Rename it to `fcmTokens` before more code accumulates
+around the current name.
 
 ---
 
-## Configuración del proyecto
+## Project setup
 
-1. **Firebase**: coloca tu `google-services.json` en `app/`. El proyecto
-   usa Cloud Firestore, Authentication (proveedor Google) y Cloud
-   Messaging — habilítalos en la consola.
-2. **Firma de release**: crea `keystore.properties` en la raíz (no lo
-   subas a git) con `storeFile`, `storePassword`, `keyAlias`,
-   `keyPassword`, y conéctalo en `app/build.gradle.kts` vía
+1. **Firebase**: place your `google-services.json` in `app/`. The
+   project uses Cloud Firestore, Authentication (Google provider), and
+   Cloud Messaging — enable them in the console.
+2. **Release signing**: create a `keystore.properties` file at the root
+   (don't commit it) with `storeFile`, `storePassword`, `keyAlias`,
+   `keyPassword`, and wire it up in `app/build.gradle.kts` via
    `signingConfigs`.
-3. **SHA-1 de cada keystore que uses** (debug y release) debe estar
-   registrado en Firebase console → Configuración del proyecto → tu app
-   Android → Huellas digitales. **Esto mordió al proyecto una vez**: sin
-   el SHA-1 de release registrado, el selector de cuentas de Google
-   simplemente no aparece en builds de release, sin ninguna excepción
-   visible en Logcat.
-4. **ProGuard/R8**: `app/proguard-rules.pro` ya incluye lo necesario para
-   Firestore (reflexión sobre modelos), Credential Manager y enums — no
-   agregar reglas `-keep` de paquetes enteros de librerías (`androidx.**`,
-   `dagger.**`, etc.), la mayoría ya traen sus propias reglas empaquetadas
-   y mantenerlas a mano solo infla el tamaño de la app.
+3. **The SHA-1 of every keystore you use** (debug and release) must be
+   registered in Firebase console → Project settings → your Android app
+   → SHA certificate fingerprints. **This bit the project once**:
+   without the release SHA-1 registered, the Google account picker
+   simply doesn't show up in release builds, with no visible exception
+   in Logcat.
+4. **ProGuard/R8**: `app/proguard-rules.pro` already includes what's
+   needed for Firestore (reflection over model classes), Credential
+   Manager, and enums — don't add blanket `-keep` rules for entire
+   library packages (`androidx.**`, `dagger.**`, etc.); most already ship
+   their own consumer rules, and keeping them manually just bloats app
+   size.
 
 ---
 
-## Roadmap (diseñado, no implementado)
+## Roadmap (designed, not implemented)
 
-Documentado en detalle en planes de contrato aparte — si los guardas en
-el repo, `docs/plans/` es la convención usada para generarlos:
+Documented in detail in separate contract-level plans — if you keep them
+in the repo, `docs/plans/` is the convention used to generate them:
 
-- **Coordinación familiar**: flujo real de sugerencia/aprobación para el
-  rol `CHILD`, historial de compras, recompra habitual, listas separadas
-  de la principal (requiere introducir una entidad `ShoppingList` que hoy
-  no existe).
-- **Anti-duplicados / eficiencia**: inventario de despensa, fechas de
-  vencimiento con recordatorio, orden de lista por pasillo.
-- **Salud/presupuesto**: resumen nutricional del carrito completo,
-  alertas de alergia por miembro (con la salvedad de que USDA no tiene un
-  campo de alérgenos estructurado confiable).
-- **Offline**: hoy la app depende de Firestore en vivo, sin cache local
-  (Room) ni cola de sincronización — pendiente de decisión de
-  arquitectura antes de que se acumule más código sobre el patrón actual.
-- **Pulido de UI**: sistema de tokens de color/tipografía, `ProductCard`
-  unificado entre pantallas, manejo estandarizado de imágenes,
-  deduplicación de resultados repetidos en Discover, estado del carrito
-  (resumen fijo + empty state), y una barra de carrito persistente con
-  catálogo de Habitual colapsable por defecto (diseñado, no construido).
-- **Búsqueda automática de foto** para productos personalizados
-  (Pexels/Unsplash) — estado de implementación sin confirmar.
+- **Family coordination**: a real suggest→approve flow for the `CHILD`
+  role, purchase history, habitual reorder suggestions, lists separate
+  from the main one (requires introducing a `ShoppingList` entity that
+  doesn't exist yet).
+- **Avoiding duplicates / efficiency**: pantry inventory, expiration
+  dates with reminders, sorting the list by aisle.
+- **Health/budget**: full-cart nutrition summary, per-member allergy
+  alerts (with the caveat that USDA doesn't have a reliably structured
+  allergen field).
+- **Offline**: the app currently depends on live Firestore, with no
+  local cache (Room) or sync queue — pending an architecture decision
+  before more code piles up on the current pattern.
+- **UI polish**: a color/typography token system, a unified `ProductCard`
+  across screens, standardized image handling, deduplication of repeated
+  results in Discover, cart state (fixed summary + empty state), and a
+  persistent cart bar with a collapsed-by-default Habitual catalog
+  (designed, not built).
+- **Automatic photo search** for custom products (Pexels/Unsplash) —
+  implementation status unconfirmed.
 
 ---
 
-## Lecciones aprendidas (para no repetir la investigación)
+## Lessons learned (so the investigation doesn't get repeated)
 
-- `GoogleApiManager: Failed to get service from broker` en Logcat es
-  ruido interno de Google Play Services reportado en decenas de apps sin
-  relación entre sí — no es, por sí solo, señal de que el login esté roto.
-- Un listener de Firestore que falla por permisos (`PERMISSION_DENIED`)
-  puede tumbar la app si el error no se captura explícitamente en el
-  callback — no asumas que una excepción de Firestore es siempre
-  recuperable por defecto.
-- Los emails de FCM/perfil bajo `households/{id}/users` no tienen
-  relación con el `users/{uid}` de Auth — nombre compartido, colecciones
-  distintas (ver Deuda técnica arriba).
+- `GoogleApiManager: Failed to get service from broker` in Logcat is
+  internal Google Play Services noise reported across dozens of
+  unrelated apps — on its own, it isn't a sign that login is broken.
+- A Firestore listener that fails on permissions (`PERMISSION_DENIED`)
+  can crash the app if the error isn't explicitly caught in the
+  callback — don't assume a Firestore exception is always recoverable
+  by default.
+- FCM/device registration under `households/{id}/users` has nothing to
+  do with Auth's `users/{uid}` — same name, different collections (see
+  Technical debt above).
