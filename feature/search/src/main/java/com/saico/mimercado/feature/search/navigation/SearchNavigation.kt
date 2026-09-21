@@ -13,8 +13,9 @@ fun NavGraphBuilder.searchGraph(
 ) {
     composable<SearchRoute> {
         SearchScreen(
+            navigator = navigator,
             onProductClick = { fdcId ->
-                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(fdcId)))
+                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(fdcId, false)))
             }
         )
     }

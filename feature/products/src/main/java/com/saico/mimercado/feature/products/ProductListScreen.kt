@@ -234,11 +234,21 @@ fun ProductListScreen(
                 if (uiState.isLoading && products.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (products.isEmpty() && !uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Text(
                             text = if (uiState.listMode == ListMode.HABITUAL) "No habitual products yet." else "No products found.",
                             color = Color.Gray
                         )
+                        if (uiState.listMode == ListMode.DISCOVER) {
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { onCreateCustomProductClick() }) {
+                                Text("Añadir producto manualmente")
+                            }
+                        }
                     }
                 } else {
                     val isHabitual = uiState.listMode == ListMode.HABITUAL

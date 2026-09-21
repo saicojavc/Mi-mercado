@@ -8,6 +8,8 @@ import com.saico.mimercado.core.common.ImageCacheManager
 import com.saico.mimercado.core.domain.usecase.products.ProductsUseCases
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
+import com.saico.mimercado.core.ui.navigation.Navigator
+import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +25,8 @@ import javax.inject.Inject
 class ProductDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val useCases: ProductsUseCases,
-    val imageCache: ImageCacheManager
+    val imageCache: ImageCacheManager,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val route: ProductDetailsRoute = savedStateHandle.toRoute()
@@ -42,13 +45,46 @@ class ProductDetailsViewModel @Inject constructor(
     private fun loadDetails() {
         viewModelScope.launch {
             _uiState.value = ProductDetailsUiState.Loading
-            useCases.getProductDetails(fdcId)
-                .onSuccess { details ->
-                    _uiState.value = ProductDetailsUiState.Success(details)
-                }
-                .onFailure { error ->
-                    _uiState.value = ProductDetailsUiState.Error(error.message ?: "Unknown error")
-                }
+            if (route.isCustom) {
+                useCases.getCustomProduct(fdcId)
+                    .onSuccess { product ->
+                        if (product != null) {
+                            _uiState.value = ProductDetailsUiState.Success(
+                                ProductDetails(
+                                    id = product.id,
+                                    name = product.nombre,
+                                    brand = product.brands,
+                                    category = product.categoria,
+                                    imageUrl = product.imageUrl,
+                                    upc = product.upc,
+                                    ingredients = "Producto personalizado",
+                                    nutrients = emptyMap()
+                                )
+                            )
+                        } else {
+                            _uiState.value = ProductDetailsUiState.Error("Product not found")
+                        }
+                    }
+                    .onFailure { error ->
+                        _uiState.value = ProductDetailsUiState.Error(error.message ?: "Unknown error")
+                    }
+            } else {
+                useCases.getProductDetails(fdcId)
+                    .onSuccess { details ->
+                        _uiState.value = ProductDetailsUiState.Success(details)
+                    }
+                    .onFailure { error ->
+                        _uiState.value = ProductDetailsUiState.Error(error.message ?: "Unknown error")
+                    }
+            }
+        }
+    }
+
+    fun deleteCustomProduct() {
+        viewModelScope.launch {
+            useCases.deleteCustomProduct(fdcId).onSuccess {
+                navigator.navigate(NavigationCommand.PopBackstack)
+            }
         }
     }
 

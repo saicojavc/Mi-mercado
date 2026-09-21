@@ -8,6 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
@@ -25,11 +27,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.saico.mimercado.core.common.UsdaImageResolver
 import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
 import com.saico.mimercado.core.ui.components.ProductImage
+import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
@@ -41,6 +45,7 @@ import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel,
     onAddToCart: (Product) -> Unit,
+    onEditClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -59,12 +64,23 @@ fun ProductDetailsScreen(
                 actions = {
                     if (uiState is ProductDetailsUiState.Success) {
                         val details = (uiState as ProductDetailsUiState.Success).details
+                        val isCustomProduct = details.ingredients == "Producto personalizado"
+                        
                         IconButton(onClick = { viewModel.toggleFavorite(details) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorite",
                                 tint = if (isFavorite) Color.Red else Color.Gray
                             )
+                        }
+
+                        if (isCustomProduct) {
+                            IconButton(onClick = { onEditClick(details.id) }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryCyan)
+                            }
+                            IconButton(onClick = { viewModel.deleteCustomProduct() }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                            }
                         }
                     }
                 },

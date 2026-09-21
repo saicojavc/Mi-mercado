@@ -3,6 +3,7 @@ package com.saico.mimercado.core.network.di
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.saico.mimercado.core.network.api.OffApiService
+import com.saico.mimercado.core.network.api.PexelsApiService
 import com.saico.mimercado.core.network.api.USDAFoodDataService
 import dagger.Module
 import dagger.Provides
@@ -76,6 +77,17 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("PexelsRetrofit")
+    fun providePexelsRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.pexels.com/")
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
     fun provideUSDAFoodDataService(@Named("USDARetrofit") retrofit: Retrofit): USDAFoodDataService {
         return retrofit.create(USDAFoodDataService::class.java)
     }
@@ -84,5 +96,11 @@ object NetworkModule {
     @Singleton
     fun provideOffApiService(@Named("OFFRetrofit") retrofit: Retrofit): OffApiService {
         return retrofit.create(OffApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePexelsApiService(@Named("PexelsRetrofit") retrofit: Retrofit): PexelsApiService {
+        return retrofit.create(PexelsApiService::class.java)
     }
 }

@@ -126,6 +126,7 @@ class RemoteFavoriteDataSourceImpl @Inject constructor(
         try {
             val householdId = getHouseholdId()
             val data = mapOf(
+                "id" to product.id,
                 "nombre" to product.nombre,
                 "categoria" to product.categoria,
                 "imageUrl" to product.imageUrl,
@@ -141,5 +142,47 @@ class RemoteFavoriteDataSourceImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("FirestoreFavorites", "❌ Failed to save custom product: ${e.message}", e)
         }
+    }
+
+    override suspend fun getCustomProduct(productId: String): Result<Product?> = try {
+        val householdId = getHouseholdId()
+        val doc = firestore.collection("households")
+            .document(householdId)
+            .collection("favorites")
+            .document(productId)
+            .get()
+            .await()
+        
+        if (doc.exists()) {
+            Result.success(
+                Product(
+                    id = doc.id,
+                    upc = doc.getString("upc") ?: "",
+                    nombre = doc.getString("nombre") ?: "",
+                    categoria = doc.getString("categoria") ?: "",
+                    imageUrl = doc.getString("imageUrl") ?: "",
+                    brands = doc.getString("brands") ?: "",
+                    isFavorite = true,
+                    isCustom = doc.getBoolean("isCustom") ?: false
+                )
+            )
+        } else {
+            Result.success(null)
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun deleteCustomProduct(productId: String): Result<Unit> = try {
+        val householdId = getHouseholdId()
+        firestore.collection("households")
+            .document(householdId)
+            .collection("favorites")
+            .document(productId)
+            .delete()
+            .await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }
