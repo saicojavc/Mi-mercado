@@ -14,5 +14,6 @@ data class ProductListUiState(
     val products: List<Product> = emptyList(),
     val isLoading: Boolean = false,
     val isPaginating: Boolean = false,
-    val isLastPage: Boolean = false
+    val isLastPage: Boolean = false,
+    val isCatalogExpanded: Boolean = false
 )

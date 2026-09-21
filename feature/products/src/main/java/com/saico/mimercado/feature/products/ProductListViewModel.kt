@@ -3,8 +3,10 @@ package com.saico.mimercado.feature.products
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saico.mimercado.core.common.CategoryMapper
+import com.saico.mimercado.core.common.ImageCacheManager
 import com.saico.mimercado.core.domain.usecase.products.ProductsUseCases
 import com.saico.mimercado.core.model.Product
+import com.saico.mimercado.core.model.DecoratedProduct
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.routes.cart.CartRoute
@@ -26,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
     private val navigator: Navigator,
-    private val useCases: ProductsUseCases
+    private val useCases: ProductsUseCases,
+    val imageCache: ImageCacheManager
 ) : ViewModel() {
     val categories = listOf("Todos", "Lácteos", "Panadería", "Carnes", "Frutas y verduras", "Despensa", "Limpieza", "Bebidas")
     val stores = listOf("Walmart", "Costco", "Publix", "Target", "Kroger", "BJ's", "Fresco y Más", "Martins", "Whole Foods", "Safeway", "ALDI")
@@ -36,7 +39,7 @@ class ProductListViewModel @Inject constructor(
 
     private val _discoverProducts = MutableStateFlow<List<Product>>(emptyList())
     
-    val filteredProducts: StateFlow<List<Product>> = combine(
+    val filteredProducts: StateFlow<List<DecoratedProduct>> = combine(
         _uiState,
         _discoverProducts,
         useCases.getFavorites()
@@ -54,9 +57,17 @@ class ProductListViewModel @Inject constructor(
         }
 
         if (state.listMode == ListMode.DISCOVER) {
-            filtered.distinctBy { "${it.nombre.lowercase().trim()}_${it.brands.lowercase().trim()}" }
+            filtered.groupBy { it.nombre.lowercase().trim() }
+                .map { (_, group) ->
+                    val first = group.first()
+                    val distinctBrands = group.map { it.brands.lowercase().trim() }.distinct()
+                    DecoratedProduct(
+                        product = first,
+                        additionalBrandsCount = if (distinctBrands.size > 1) distinctBrands.size - 1 else 0
+                    )
+                }
         } else {
-            filtered
+            filtered.map { DecoratedProduct(it) }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -74,8 +85,17 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
+    fun toggleCatalogExpanded() {
+        _uiState.update { it.copy(isCatalogExpanded = !it.isCatalogExpanded) }
+    }
+
     fun onSearchQueryChanged(query: String, isScan: Boolean = false) {
-        _uiState.update { it.copy(searchQuery = query) }
+        _uiState.update { 
+            it.copy(
+                searchQuery = query,
+                isCatalogExpanded = if (query.isNotBlank()) true else it.isCatalogExpanded
+            ) 
+        }
         
         if (isScan) {
             _uiState.update { it.copy(listMode = ListMode.DISCOVER) }
@@ -95,7 +115,12 @@ class ProductListViewModel @Inject constructor(
 
     fun selectCategory(category: String) {
         if (_uiState.value.selectedCategory == category) return
-        _uiState.update { it.copy(selectedCategory = category) }
+        _uiState.update { 
+            it.copy(
+                selectedCategory = category,
+                isCatalogExpanded = if (category != "Todos") true else it.isCatalogExpanded
+            ) 
+        }
         if (_uiState.value.listMode == ListMode.DISCOVER) {
             loadProducts(reset = true)
         }

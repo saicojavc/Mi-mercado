@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
@@ -67,11 +68,18 @@ fun SearchScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(uiState.products, key = { it.id }) { product ->
+                items(uiState.products, key = { it.product.id }) { decorated ->
                     ProductCard(
-                        product = product,
-                        onAddClick = { viewModel.onEvent(SearchUiEvent.AddToCart(product)) },
-                        onClick = { onProductClick(product.id) }
+                        product = decorated.product,
+                        onClick = { onProductClick(decorated.product.id) },
+                        additionalBrandsCount = decorated.additionalBrandsCount,
+                        onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
+                        onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
+                        trailingContent = {
+                            AddToCartButton(
+                                onClick = { viewModel.onEvent(SearchUiEvent.AddToCart(decorated.product)) }
+                            )
+                        }
                     )
                 }
             }

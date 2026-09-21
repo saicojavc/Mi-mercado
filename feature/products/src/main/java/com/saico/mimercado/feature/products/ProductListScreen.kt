@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -40,6 +41,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
+import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.theme.AppBackground
@@ -207,15 +209,15 @@ fun ProductListScreen(
                             Icon(
                                 imageVector = Icons.Default.QrCodeScanner,
                                 contentDescription = "Scan Barcode",
-                                tint = PrimaryCyan
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = MaterialTheme.shapes.medium,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.LightGray,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                         unfocusedContainerColor = Color.White,
                         focusedContainerColor = Color.White
                     )
@@ -239,16 +241,56 @@ fun ProductListScreen(
                         )
                     }
                 } else {
+                    val isHabitual = uiState.listMode == ListMode.HABITUAL
+                    val showCollapsedHeader = isHabitual && !uiState.isCatalogExpanded && uiState.searchQuery.isBlank() && uiState.selectedCategory == "Todos"
+
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(products, key = { it.id }) { product ->
-                            ProductCard(
-                                product = product,
-                                onAddClick = { onAddToCart(product) },
-                                onClick = { onProductClick(product) }
-                            )
+                        if (showCollapsedHeader) {
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    onClick = { viewModel.toggleCatalogExpanded() },
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "Ver mis productos habituales (${products.size})",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowDown,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            items(products, key = { it.product.id }) { decorated ->
+                                ProductCard(
+                                    product = decorated.product,
+                                    onClick = { onProductClick(decorated.product) },
+                                    additionalBrandsCount = decorated.additionalBrandsCount,
+                                    onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
+                                    onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
+                                    trailingContent = {
+                                        AddToCartButton(
+                                            onClick = { onAddToCart(decorated.product) }
+                                        )
+                                    }
+                                )
+                            }
                         }
                         
                         if (uiState.isPaginating) {

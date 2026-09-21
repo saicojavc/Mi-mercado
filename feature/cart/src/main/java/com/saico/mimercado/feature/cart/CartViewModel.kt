@@ -3,6 +3,7 @@ package com.saico.mimercado.feature.cart
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.saico.mimercado.core.common.ImageCacheManager
 import com.saico.mimercado.core.common.UserProvider
 import com.saico.mimercado.core.domain.usecase.cart.CartUseCases
 import com.saico.mimercado.core.model.CartItem
@@ -31,7 +32,8 @@ private const val TAG = "CartViewModel"
 @HiltViewModel
 class CartViewModel @Inject constructor(
     private val cartUseCases: CartUseCases,
-    private val userProvider: UserProvider
+    private val userProvider: UserProvider,
+    val imageCache: ImageCacheManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CartUiState())

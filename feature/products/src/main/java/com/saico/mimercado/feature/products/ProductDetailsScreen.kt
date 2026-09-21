@@ -25,10 +25,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.saico.mimercado.core.common.UsdaImageResolver
+import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
+import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.ui.theme.AppBackground
 import com.saico.mimercado.core.ui.theme.PrimaryCyan
 import com.saico.mimercado.core.ui.theme.SecondaryTeal
@@ -114,7 +115,7 @@ fun ProductDetailsScreen(
                     }
                 }
                 is ProductDetailsUiState.Success -> {
-                    ProductDetailsContent(details = state.details)
+                    ProductDetailsContent(details = state.details, viewModel = viewModel)
                 }
                 is ProductDetailsUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -127,26 +128,25 @@ fun ProductDetailsScreen(
 }
 
 @Composable
-private fun ProductDetailsContent(details: ProductDetails) {
-    
-    val candidateUrls = remember(details.id) {
+private fun ProductDetailsContent(
+    details: ProductDetails,
+    viewModel: ProductDetailsViewModel
+) {
+    val upc = remember(details.upc) { details.upc.filter { it.isDigit() } }
+    val candidateUrls = remember(upc, details.imageUrl, details.name) {
         val list = mutableListOf<String>()
         if (details.imageUrl.isNotBlank()) list.add(details.imageUrl)
-        list.add(UsdaImageResolver.getSearchThumbnailUrl(details.brand, details.name))
         
-        val upc = details.upc.filter { it.isDigit() }
+        // Bing es el respaldo más rápido
+        list.add(UsdaImageResolver.getSearchThumbnailUrl(details.brand, details.name))
+
         if (upc.isNotEmpty()) {
-            val upc12 = upc.padStart(12, '0').takeLast(12)
-            list.add("https://i5.walmartimages.com/asr/$upc12.jpg")
-            list.add("https://target.scene7.com/is/image/Target/GUEST_$upc12?wid=400&hei=400&fmt=pjpeg")
+            list.add(UsdaImageResolver.buildWalmartUrl(upc))
             list.add(UsdaImageResolver.buildOffUrl(upc))
         }
-        list
+        list.distinct().filter { it.isNotBlank() }
     }
     
-    var urlIndex by remember(details.id) { mutableIntStateOf(0) }
-    val currentUrl = candidateUrls.getOrNull(urlIndex) ?: ""
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -163,26 +163,17 @@ private fun ProductDetailsContent(details: ProductDetails) {
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                if (currentUrl.isNotEmpty()) {
-                    AsyncImage(
-                        model = currentUrl,
-                        contentDescription = details.name,
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        contentScale = ContentScale.Fit,
-                        onError = {
-                            if (urlIndex < candidateUrls.size - 1) {
-                                urlIndex++
-                            }
-                        }
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = null,
-                        modifier = Modifier.size(100.dp),
-                        tint = Color(0xFFEEEEEE)
-                    )
-                }
+                val cacheKey = remember(details.upc, details.id) { details.upc.ifBlank { details.id } }
+                
+                ProductImage(
+                    candidateUrls = candidateUrls,
+                    productName = details.name,
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentScale = ContentScale.Fit,
+                    onUrlVerified = { verifiedUrl ->
+                        viewModel.imageCache.saveVerifiedUrl(cacheKey, verifiedUrl)
+                    }
+                )
             }
         }
 

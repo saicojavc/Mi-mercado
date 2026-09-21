@@ -7,15 +7,17 @@ import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryCyan,
-    secondary = SecondaryTeal,
-    background = AppBackground,
-    surface = AppBackground,
     onPrimary = Color.White,
+    secondary = SecondaryTeal,
     onSecondary = Color.White,
+    tertiary = WarningAmber,
+    onTertiary = Color.White,
+    background = AppBackground,
     onBackground = TextDark,
+    surface = Color.White,
     onSurface = TextDark,
     surfaceVariant = Color(0xFFF1F5F9),
-    onSurfaceVariant = Color(0xFF64748B),
+    onSurfaceVariant = NeutralGray,
     error = ErrorRed,
     onError = Color.White
 )
@@ -26,12 +28,11 @@ fun MiMercadoTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    // Force light theme and stick to the palette
-    val colorScheme = LightColorScheme
-
+    // Forced light theme for now to maintain consistent UI polish
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

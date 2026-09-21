@@ -10,8 +10,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,13 +30,17 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
+import com.saico.mimercado.core.ui.components.PersistentCartBar
+import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
 import com.saico.mimercado.core.ui.navigation.routes.Route
+import com.saico.mimercado.core.ui.navigation.routes.cart.CartRoute
 import com.saico.mimercado.core.ui.theme.MiMercadoTheme
 import com.saico.mimercado.feature.auth.navigation.authGraph
 import com.saico.mimercado.feature.cart.CartViewModel
@@ -123,23 +134,47 @@ private fun MainContainer(
     val cartViewModel: CartViewModel = hiltViewModel()
     val cartUiState by cartViewModel.uiState.collectAsState()
     val totalItems = cartUiState.items.sumOf { it.cantidad }
+    
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        authGraph(
-            onSignInSuccess = {},
-            fcmManager = (navController.context as MainActivity).fcmManager
-        )
-        productsGraph(
-            totalCartItems = totalItems,
-            errorMessages = cartViewModel.errorMessages,
-            onAddToCart = { cartViewModel.addToCart(it) },
-            navigator = navigator
-        )
-        searchGraph(navigator = navigator)
-        settingsGraph(navigator = navigator)
-        cartGraph()
+    Scaffold(
+        bottomBar = {
+            val route = currentDestination?.route ?: ""
+            // Verificamos si estamos en una de las rutas que deben mostrar la barra
+            val isExplorationRoute = route.contains("ProductsRoute", ignoreCase = true) ||
+                                    route.contains("SearchRoute", ignoreCase = true)
+            
+            AnimatedVisibility(
+                visible = isExplorationRoute && totalItems > 0,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
+                PersistentCartBar(
+                    totalItems = totalItems,
+                    onClick = { navigator.navigate(NavigationCommand.NavigateTo(CartRoute)) }
+                )
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            authGraph(
+                onSignInSuccess = {},
+                fcmManager = (navController.context as MainActivity).fcmManager
+            )
+            productsGraph(
+                totalCartItems = totalItems,
+                errorMessages = cartViewModel.errorMessages,
+                onAddToCart = { cartViewModel.addToCart(it) },
+                navigator = navigator
+            )
+            searchGraph(navigator = navigator)
+            settingsGraph(navigator = navigator)
+            cartGraph()
+        }
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.saico.mimercado.core.common.ImageCacheManager
 import com.saico.mimercado.core.domain.usecase.products.ProductsUseCases
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val useCases: ProductsUseCases
+    private val useCases: ProductsUseCases,
+    val imageCache: ImageCacheManager
 ) : ViewModel() {
 
     private val route: ProductDetailsRoute = savedStateHandle.toRoute()
