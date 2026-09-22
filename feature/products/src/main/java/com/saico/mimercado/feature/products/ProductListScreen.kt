@@ -97,14 +97,29 @@ fun ProductListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Header Title
-            Text(
-                text = "Catálogo de Productos",
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
-            )
+            // Header Title with Create Custom Action
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Catálogo de Productos",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                IconButton(onClick = onCreateCustomProductClick) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Crear producto personalizado",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
 
             // Search Bar & Scanner Button
             Row(

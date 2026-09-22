@@ -77,6 +77,9 @@ fun NavGraphBuilder.productsGraph(
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) },
             onSearchClick = { navigator.navigate(NavigationCommand.NavigateTo(SearchRoute)) },
             onScanBarcodeClick = { navigator.navigate(NavigationCommand.NavigateTo(SearchRoute)) },
+            onProductClick = { product ->
+                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id, product.isCustom)))
+            },
             onCreateCustomProductClick = {
                 navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute()))
             }

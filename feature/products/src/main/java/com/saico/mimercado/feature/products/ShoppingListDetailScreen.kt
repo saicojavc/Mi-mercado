@@ -36,7 +36,8 @@ fun ShoppingListDetailScreen(
     onBackClick: () -> Unit,
     onSearchClick: () -> Unit,
     onScanBarcodeClick: () -> Unit,
-    onCreateCustomProductClick: () -> Unit
+    onProductClick: (Product) -> Unit = {},
+    onCreateCustomProductClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
@@ -44,13 +45,16 @@ fun ShoppingListDetailScreen(
     var renameInput by remember { mutableStateOf("") }
 
     val filteredFavorites = remember(uiState.favorites, uiState.selectedFavoriteCategory) {
-        if (uiState.selectedFavoriteCategory == "Todos") {
+        val selectedCat = uiState.selectedFavoriteCategory
+        if (selectedCat == null) {
+            emptyList()
+        } else if (selectedCat == "Todos") {
             uiState.favorites
         } else {
             uiState.favorites.filter { fav ->
                 val normalized = CategoryMapper.getNormalizedCategory(fav.categoria, fav.nombre)
-                normalized.contains(uiState.selectedFavoriteCategory, ignoreCase = true) ||
-                        fav.categoria.contains(uiState.selectedFavoriteCategory, ignoreCase = true)
+                normalized.contains(selectedCat, ignoreCase = true) ||
+                        fav.categoria.contains(selectedCat, ignoreCase = true)
             }
         }
     }
@@ -245,7 +249,7 @@ fun ShoppingListDetailScreen(
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 Text(
-                                    "Escribe abajo o selecciona productos de tus Favoritos o del Catálogo.",
+                                    "Escribe abajo o toca una categoría para agregar productos.",
                                     fontSize = 13.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -256,7 +260,8 @@ fun ShoppingListDetailScreen(
                     items(uiState.items, key = { it.itemId }) { item ->
                         ListItemRow(
                             item = item,
-                            onQuantityChange = { newQty -> viewModel.updateQuantity(item.itemId, newQty) }
+                            onQuantityChange = { newQty -> viewModel.updateQuantity(item.itemId, newQty) },
+                            onProductClick = { onProductClick(item.toProduct()) }
                         )
                     }
                 }
@@ -334,7 +339,7 @@ fun ShoppingListDetailScreen(
                     }
                 }
 
-                // TAB 1: MIS FAVORITOS (CON FILTRO DE CATEGORÍA)
+                // TAB 1: MIS FAVORITOS
                 if (uiState.activeTab == ExplorationTab.FAVORITES) {
                     item {
                         LazyRow(
@@ -359,7 +364,36 @@ fun ShoppingListDetailScreen(
                         }
                     }
 
-                    if (filteredFavorites.isEmpty()) {
+                    val favCategory = uiState.selectedFavoriteCategory
+                    if (favCategory == null) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.TouchApp,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(
+                                        "Toca una categoría arriba para ver tus productos favoritos.",
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    } else if (filteredFavorites.isEmpty()) {
                         item {
                             Box(
                                 modifier = Modifier
@@ -371,7 +405,7 @@ fun ShoppingListDetailScreen(
                                     if (uiState.favorites.isEmpty())
                                         "Aún no tienes productos en tus Favoritos. Explora el Catálogo para guardar tus preferidos."
                                     else
-                                        "No tienes productos favoritos en la categoría ${uiState.selectedFavoriteCategory}.",
+                                        "No tienes productos favoritos en la categoría $favCategory.",
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -381,7 +415,7 @@ fun ShoppingListDetailScreen(
                         items(filteredFavorites, key = { "fav_${it.id}" }) { product ->
                             ProductCard(
                                 product = product,
-                                onClick = { viewModel.addProductToList(product) },
+                                onClick = { onProductClick(product) },
                                 trailingContent = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
@@ -400,9 +434,26 @@ fun ShoppingListDetailScreen(
                             )
                         }
                     }
+
+                    // CREATE CUSTOM PRODUCT BUTTON FOR FAVORITES
+                    item {
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = onCreateCustomProductClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Crear producto personalizado")
+                        }
+                    }
                 }
 
-                // TAB 2: CATÁLOGO COMPLETO POR CATEGORÍA (CON BOTÓN DE CORAZÓN PARA GUARDAR EN FAVORITOS)
+                // TAB 2: CATÁLOGO COMPLETO POR CATEGORÍA
                 if (uiState.activeTab == ExplorationTab.CATALOG) {
                     item {
                         LazyRow(
@@ -428,56 +479,86 @@ fun ShoppingListDetailScreen(
                     }
 
                     val selectedCat = uiState.selectedCatalogCategory
-                    val products = uiState.categoryProductsMap[selectedCat] ?: emptyList()
-
-                    if (uiState.isLoadingCategoryProducts && products.isEmpty()) {
+                    if (selectedCat == null) {
                         item {
-                            Box(
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(24.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                             ) {
-                                CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                            }
-                        }
-                    } else if (products.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(24.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "No se encontraron productos en $selectedCat",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.TouchApp,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(
+                                        "Toca una categoría arriba para ver productos del catálogo.",
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     } else {
-                        items(products, key = { "cat_${selectedCat}_${it.id}" }) { product ->
-                            val isFav = uiState.favorites.any { it.id == product.id }
-                            ProductCard(
-                                product = product,
-                                onClick = { viewModel.addProductToList(product) },
-                                trailingContent = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        IconButton(onClick = { viewModel.toggleFavorite(product) }) {
-                                            Icon(
-                                                imageVector = if (isFav) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
-                                                contentDescription = if (isFav) "Quitar de favoritos" else "Guardar en favoritos",
-                                                tint = if (isFav) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        AddToCartButton(onClick = { viewModel.addProductToList(product) })
-                                    }
+                        val products = uiState.categoryProductsMap[selectedCat] ?: emptyList()
+
+                        if (uiState.isLoadingCategoryProducts && products.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(28.dp))
                                 }
-                            )
+                            }
+                        } else if (products.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "No se encontraron productos en $selectedCat",
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            items(products, key = { "cat_${selectedCat}_${it.id}" }) { product ->
+                                val isFav = uiState.favorites.any { it.id == product.id }
+                                ProductCard(
+                                    product = product,
+                                    onClick = { onProductClick(product) },
+                                    trailingContent = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            IconButton(onClick = { viewModel.toggleFavorite(product) }) {
+                                                Icon(
+                                                    imageVector = if (isFav) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
+                                                    contentDescription = if (isFav) "Quitar de favoritos" else "Guardar en favoritos",
+                                                    tint = if (isFav) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            AddToCartButton(onClick = { viewModel.addProductToList(product) })
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -506,13 +587,14 @@ fun ShoppingListDetailScreen(
 @Composable
 fun ListItemRow(
     item: CartItem,
-    onQuantityChange: (Int) -> Unit
+    onQuantityChange: (Int) -> Unit,
+    onProductClick: () -> Unit = {}
 ) {
     val product = remember(item) { item.toProduct() }
 
     ProductCard(
         product = product,
-        onClick = {},
+        onClick = onProductClick,
         avatarBadge = {
             item.addedByAvatar?.let { avatar ->
                 Surface(

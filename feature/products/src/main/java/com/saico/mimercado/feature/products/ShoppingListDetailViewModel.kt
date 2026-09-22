@@ -47,8 +47,8 @@ data class ShoppingListDetailUiState(
     val members: List<HouseholdMember> = emptyList(),
     val favorites: List<Product> = emptyList(),
     val activeTab: ExplorationTab = ExplorationTab.FAVORITES,
-    val selectedFavoriteCategory: String = "Todos",
-    val selectedCatalogCategory: String = "Lácteos",
+    val selectedFavoriteCategory: String? = null, // null = colapsado
+    val selectedCatalogCategory: String? = null,  // null = colapsado
     val categoryProductsMap: Map<String, List<Product>> = emptyMap(),
     val isLoadingCategoryProducts: Boolean = false,
     val quickAddText: String = "",
@@ -122,8 +122,9 @@ class ShoppingListDetailViewModel @Inject constructor(
                 }
             }.collect { state ->
                 _uiState.value = state
-                if (state.activeTab == ExplorationTab.CATALOG && !state.categoryProductsMap.containsKey(state.selectedCatalogCategory)) {
-                    loadCategoryProducts(state.selectedCatalogCategory)
+                val selectedCat = state.selectedCatalogCategory
+                if (state.activeTab == ExplorationTab.CATALOG && selectedCat != null && !state.categoryProductsMap.containsKey(selectedCat)) {
+                    loadCategoryProducts(selectedCat)
                 }
             }
         }
@@ -131,19 +132,24 @@ class ShoppingListDetailViewModel @Inject constructor(
 
     fun selectExplorationTab(tab: ExplorationTab) {
         _uiState.update { it.copy(activeTab = tab) }
-        if (tab == ExplorationTab.CATALOG && !uiState.value.categoryProductsMap.containsKey(uiState.value.selectedCatalogCategory)) {
-            loadCategoryProducts(uiState.value.selectedCatalogCategory)
+        val selectedCat = uiState.value.selectedCatalogCategory
+        if (tab == ExplorationTab.CATALOG && selectedCat != null && !uiState.value.categoryProductsMap.containsKey(selectedCat)) {
+            loadCategoryProducts(selectedCat)
         }
     }
 
     fun selectFavoriteCategory(category: String) {
-        _uiState.update { it.copy(selectedFavoriteCategory = category) }
+        _uiState.update {
+            val next = if (it.selectedFavoriteCategory == category) null else category
+            it.copy(selectedFavoriteCategory = next)
+        }
     }
 
     fun selectCatalogCategory(category: String) {
-        _uiState.update { it.copy(selectedCatalogCategory = category) }
-        if (!uiState.value.categoryProductsMap.containsKey(category)) {
-            loadCategoryProducts(category)
+        val next = if (uiState.value.selectedCatalogCategory == category) null else category
+        _uiState.update { it.copy(selectedCatalogCategory = next) }
+        if (next != null && !uiState.value.categoryProductsMap.containsKey(next)) {
+            loadCategoryProducts(next)
         }
     }
 
