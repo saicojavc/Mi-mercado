@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.saico.mimercado.core.domain.repository.AuthRepository
 import com.saico.mimercado.core.ui.navigation.routes.Route
 import com.saico.mimercado.core.ui.navigation.routes.auth.SignInRoute
-import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
+import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListsRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,12 +19,12 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
-    private val _isDarkMode = mutableStateOf(false)
+    private val _isDarkMode = mutableStateOf(true) // Dark theme default
     val isDarkMode: State<Boolean> = _isDarkMode
 
     val startDestination: StateFlow<Route?> = authRepository.observeAuthState()
         .map { authUser ->
-            if (authUser == null) SignInRoute else ProductsRoute
+            if (authUser == null) SignInRoute else ShoppingListsRoute
         }
         .stateIn(
             scope = viewModelScope,

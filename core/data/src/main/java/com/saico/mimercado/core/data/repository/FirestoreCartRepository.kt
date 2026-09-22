@@ -21,58 +21,63 @@ class FirestoreCartRepository @Inject constructor(
     private fun currentHouseholdIdFlow(): Flow<String> = callbackFlow {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid == null) {
-            trySend("familia_valdes")
+            trySend("")
             close()
             return@callbackFlow
         }
         val subscription = firestore.collection("users").document(uid)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    trySend("familia_valdes")
+                    trySend("")
                     return@addSnapshotListener
                 }
-                val householdId = snapshot?.getString("householdId") ?: "familia_valdes"
+                val householdId = snapshot?.getString("householdId") ?: ""
                 trySend(householdId)
             }
         awaitClose { subscription.remove() }
     }
 
     private suspend fun getHouseholdId(): String {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return "familia_valdes"
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return ""
         return try {
             val snapshot = firestore.collection("users").document(uid).get().await()
-            snapshot.getString("householdId") ?: "familia_valdes"
+            snapshot.getString("householdId") ?: ""
         } catch (e: Exception) {
-            "familia_valdes"
+            ""
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCartItems(): Flow<List<CartItem>> = currentHouseholdIdFlow().flatMapLatest { householdId ->
-        callbackFlow {
-            val listener = firestore.collection("households")
-                .document(householdId)
-                .collection("cart")
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) {
-                        trySend(emptyList()) // Evitar que el flujo se cuelgue ante errores de permisos
-                        return@addSnapshotListener
-                    }
-                    if (snapshot != null) {
-                        val items = snapshot.documents.mapNotNull { doc ->
-                            doc.toObject(CartItem::class.java)?.apply {
-                                itemId = doc.id
-                            }
+        if (householdId.isBlank()) {
+            flowOf(emptyList())
+        } else {
+            callbackFlow {
+                val listener = firestore.collection("households")
+                    .document(householdId)
+                    .collection("cart")
+                    .addSnapshotListener { snapshot, e ->
+                        if (e != null) {
+                            trySend(emptyList()) // Evitar que el flujo se cuelgue ante errores de permisos
+                            return@addSnapshotListener
                         }
-                        trySend(items)
+                        if (snapshot != null) {
+                            val items = snapshot.documents.mapNotNull { doc ->
+                                doc.toObject(CartItem::class.java)?.apply {
+                                    itemId = doc.id
+                                }
+                            }
+                            trySend(items)
+                        }
                     }
-                }
-            awaitClose { listener.remove() }
+                awaitClose { listener.remove() }
+            }
         }
     }
 
     override suspend fun addToCart(product: Product, userId: String) {
         val householdId = getHouseholdId()
+        if (householdId.isBlank()) return
         val cartCollection = firestore.collection("households")
             .document(householdId)
             .collection("cart")

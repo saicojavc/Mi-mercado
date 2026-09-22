@@ -59,4 +59,10 @@ abstract class DataModule {
     abstract fun bindFavoriteRepository(
         favoriteRepositoryImpl: FavoriteRepositoryImpl
     ): FavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindShoppingListRepository(
+        firestoreShoppingListRepository: FirestoreShoppingListRepository
+    ): ShoppingListRepository
 }
