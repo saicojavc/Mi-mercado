@@ -7,7 +7,7 @@ enum class ListMode {
 }
 
 data class ProductListUiState(
-    val listMode: ListMode = ListMode.HABITUAL,
+    val listMode: ListMode = ListMode.DISCOVER,
     val selectedCategory: String = "Todos",
     val selectedStore: String? = null,
     val searchQuery: String = "",
@@ -15,5 +15,5 @@ data class ProductListUiState(
     val isLoading: Boolean = false,
     val isPaginating: Boolean = false,
     val isLastPage: Boolean = false,
-    val isCatalogExpanded: Boolean = false
+    val isCatalogExpanded: Boolean = true
 )

@@ -11,6 +11,7 @@ import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListDetailRou
 import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
+import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
 import com.saico.mimercado.core.ui.navigation.routes.profile.ProfileRoute
 import com.saico.mimercado.core.ui.navigation.routes.search.SearchRoute
 import com.saico.mimercado.feature.products.CreateCustomProductScreen
@@ -19,6 +20,8 @@ import com.saico.mimercado.feature.products.CreateListScreen
 import com.saico.mimercado.feature.products.CreateListViewModel
 import com.saico.mimercado.feature.products.ProductDetailsScreen
 import com.saico.mimercado.feature.products.ProductDetailsViewModel
+import com.saico.mimercado.feature.products.ProductListScreen
+import com.saico.mimercado.feature.products.ProductListViewModel
 import com.saico.mimercado.feature.products.ShoppingListDetailScreen
 import com.saico.mimercado.feature.products.ShoppingListDetailViewModel
 import com.saico.mimercado.feature.products.ShoppingListsScreen
@@ -42,6 +45,26 @@ fun NavGraphBuilder.productsGraph(
                 navigator.navigate(NavigationCommand.NavigateTo(CreateListRoute))
             },
             onProfileClick = {
+                navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
+            }
+        )
+    }
+
+    composable<ProductsRoute> {
+        val viewModel: ProductListViewModel = hiltViewModel()
+        ProductListScreen(
+            viewModel = viewModel,
+            totalCartItems = totalCartItems,
+            errorMessages = errorMessages,
+            onAddToCart = onAddToCart,
+            onProductClick = { product ->
+                navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id, product.isCustom)))
+            },
+            onCreateCustomProductClick = {
+                val query = viewModel.uiState.value.searchQuery
+                navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute(prefillName = query.ifBlank { null })))
+            },
+            onSettingsClick = {
                 navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
             }
         )

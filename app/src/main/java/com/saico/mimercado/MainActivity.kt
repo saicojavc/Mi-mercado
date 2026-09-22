@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +43,7 @@ import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
 import com.saico.mimercado.core.ui.navigation.routes.Route
 import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListsRoute
+import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
 import com.saico.mimercado.core.ui.navigation.routes.profile.ProfileRoute
 import com.saico.mimercado.core.ui.theme.MiMercadoTheme
 import com.saico.mimercado.feature.auth.navigation.authGraph
@@ -141,8 +143,10 @@ private fun MainContainer(
 
     val showBottomNav = currentRoute.contains("ShoppingListsRoute", ignoreCase = true) ||
             currentRoute.contains("ProfileRoute", ignoreCase = true) ||
+            currentRoute.contains("ProductsRoute", ignoreCase = true) ||
             currentRoute.contains("shopping_lists", ignoreCase = true) ||
-            currentRoute.contains("profile", ignoreCase = true)
+            currentRoute.contains("profile", ignoreCase = true) ||
+            currentRoute.contains("products", ignoreCase = true)
 
     Scaffold(
         bottomBar = {
@@ -156,6 +160,7 @@ private fun MainContainer(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     val isListsSelected = currentRoute.contains("lists", ignoreCase = true)
+                    val isCatalogSelected = currentRoute.contains("products", ignoreCase = true) && !isListsSelected
                     val isProfileSelected = currentRoute.contains("profile", ignoreCase = true)
 
                     NavigationBarItem(
@@ -165,6 +170,20 @@ private fun MainContainer(
                         },
                         icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Listas") },
                         label = { Text("Mis Listas", fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.secondary,
+                            selectedTextColor = MaterialTheme.colorScheme.secondary,
+                            indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = isCatalogSelected,
+                        onClick = {
+                            navigator.navigate(NavigationCommand.NavigateTo(ProductsRoute))
+                        },
+                        icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Catálogo") },
+                        label = { Text("Catálogo", fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.secondary,
                             selectedTextColor = MaterialTheme.colorScheme.secondary,
