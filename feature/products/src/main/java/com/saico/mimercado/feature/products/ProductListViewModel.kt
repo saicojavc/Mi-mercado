@@ -176,6 +176,14 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
+    fun showAddedToast(productName: String) {
+        _uiState.update { it.copy(toastMessage = "¡'$productName' agregado a la lista principal!") }
+    }
+
+    fun clearToast() {
+        _uiState.update { it.copy(toastMessage = null) }
+    }
+
     fun navigateToCart() {
         navigator.navigate(NavigationCommand.NavigateTo(CartRoute))
     }

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.common.UsdaImageResolver
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
+import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 
@@ -39,6 +40,7 @@ fun ProductDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
+    var toastMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -99,6 +101,7 @@ fun ProductDetailsScreen(
                                         brands = details.brand
                                     )
                                 )
+                                toastMessage = "¡'${details.name}' agregado a la lista!"
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -118,11 +121,10 @@ fun ProductDetailsScreen(
             }
         }
     ) { innerPadding ->
-        Surface(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+                .fillMaxSize()
         ) {
             when (val state = uiState) {
                 is ProductDetailsUiState.Loading -> {
@@ -139,6 +141,14 @@ fun ProductDetailsScreen(
                     }
                 }
             }
+
+            AppToast(
+                message = toastMessage,
+                onDismiss = { toastMessage = null },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
     }
 }

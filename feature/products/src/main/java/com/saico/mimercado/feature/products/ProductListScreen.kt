@@ -33,6 +33,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.components.AddToCartButton
+import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.feature.products.components.BarcodeScannerView
@@ -209,7 +210,10 @@ fun ProductListScreen(
                                 onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
                                 trailingContent = {
                                     AddToCartButton(
-                                        onClick = { onAddToCart(decorated.product) }
+                                        onClick = {
+                                            onAddToCart(decorated.product)
+                                            viewModel.showAddedToast(decorated.product.nombre)
+                                        }
                                     )
                                 }
                             )
@@ -229,6 +233,14 @@ fun ProductListScreen(
                         }
                     }
                 }
+
+                AppToast(
+                    message = uiState.toastMessage,
+                    onDismiss = viewModel::clearToast,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 80.dp)
+                )
             }
         }
     }

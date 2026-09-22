@@ -15,8 +15,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
@@ -27,7 +27,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -155,55 +157,74 @@ private fun MainContainer(
                 enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
             ) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
-                    val isListsSelected = currentRoute.contains("lists", ignoreCase = true)
-                    val isCatalogSelected = currentRoute.contains("products", ignoreCase = true) && !isListsSelected
-                    val isProfileSelected = currentRoute.contains("profile", ignoreCase = true)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 6.dp,
+                        shadowElevation = 8.dp
+                    ) {
+                        NavigationBar(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            tonalElevation = 0.dp,
+                            modifier = Modifier
+                                .height(72.dp)
+                                .padding(top = 4.dp, bottom = 4.dp)
+                        ) {
+                            val isListsSelected = currentRoute.contains("lists", ignoreCase = true)
+                            val isCatalogSelected = currentRoute.contains("products", ignoreCase = true) && !isListsSelected
+                            val isProfileSelected = currentRoute.contains("profile", ignoreCase = true)
 
-                    NavigationBarItem(
-                        selected = isListsSelected,
-                        onClick = {
-                            navigator.navigate(NavigationCommand.NavigateTo(ShoppingListsRoute))
-                        },
-                        icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Listas") },
-                        label = { Text("Mis Listas", fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.secondary,
-                            selectedTextColor = MaterialTheme.colorScheme.secondary,
-                            indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = isListsSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ShoppingListsRoute))
+                                },
+                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Listas") },
+                                label = { Text("Mis Listas", fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = isCatalogSelected,
-                        onClick = {
-                            navigator.navigate(NavigationCommand.NavigateTo(ProductsRoute))
-                        },
-                        icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Catálogo") },
-                        label = { Text("Catálogo", fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.secondary,
-                            selectedTextColor = MaterialTheme.colorScheme.secondary,
-                            indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = isCatalogSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ProductsRoute))
+                                },
+                                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Catálogo") },
+                                label = { Text("Catálogo", fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = isProfileSelected,
-                        onClick = {
-                            navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
-                        },
-                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") },
-                        label = { Text("Perfil", fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Normal) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.secondary,
-                            selectedTextColor = MaterialTheme.colorScheme.secondary,
-                            indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = isProfileSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
+                                },
+                                icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") },
+                                label = { Text("Perfil", fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }

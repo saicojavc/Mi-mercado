@@ -52,6 +52,7 @@ data class ShoppingListDetailUiState(
     val categoryProductsMap: Map<String, List<Product>> = emptyMap(),
     val isLoadingCategoryProducts: Boolean = false,
     val quickAddText: String = "",
+    val toastMessage: String? = null,
     val currentUserUid: String = "",
     val currentUserDisplayName: String = "",
     val currentUserAvatar: String? = null,
@@ -163,6 +164,10 @@ class ShoppingListDetailViewModel @Inject constructor(
         _uiState.update { it.copy(quickAddText = text) }
     }
 
+    fun clearToast() {
+        _uiState.update { it.copy(toastMessage = null) }
+    }
+
     fun confirmQuickAdd() {
         val text = uiState.value.quickAddText.trim()
         if (text.isBlank()) return
@@ -184,7 +189,7 @@ class ShoppingListDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             shoppingListUseCases.addListItem(list.householdId, list.id, newItem)
-            _uiState.update { it.copy(quickAddText = "") }
+            _uiState.update { it.copy(quickAddText = "", toastMessage = "¡'${text}' agregado a la lista!") }
         }
     }
 
@@ -211,6 +216,7 @@ class ShoppingListDetailViewModel @Inject constructor(
                 )
                 shoppingListUseCases.addListItem(list.householdId, list.id, newItem)
             }
+            _uiState.update { it.copy(toastMessage = "¡'${product.nombre}' agregado a la lista!") }
         }
     }
 

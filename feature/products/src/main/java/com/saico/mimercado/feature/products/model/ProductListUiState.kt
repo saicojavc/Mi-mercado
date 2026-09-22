@@ -12,6 +12,7 @@ data class ProductListUiState(
     val selectedStore: String? = null,
     val searchQuery: String = "",
     val products: List<Product> = emptyList(),
+    val toastMessage: String? = null,
     val isLoading: Boolean = false,
     val isPaginating: Boolean = false,
     val isLastPage: Boolean = false,
