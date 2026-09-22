@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

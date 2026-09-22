@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

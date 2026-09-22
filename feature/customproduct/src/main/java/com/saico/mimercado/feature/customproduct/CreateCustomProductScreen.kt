@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.customproduct
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.saico.mimercado.feature.products.model.CreateCustomProductUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

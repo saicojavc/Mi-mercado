@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.model.HouseholdMember
-import com.saico.mimercado.core.model.ListCoverTheme
 import com.saico.mimercado.core.model.ShoppingListSummary
 import com.saico.mimercado.core.model.ShoppingListType
 import com.saico.mimercado.core.ui.util.AvatarUtils
@@ -246,7 +244,7 @@ fun parseHexColor(hex: String, fallback: Color): Color {
         } else if (cleaned.length == 8) {
             Color(colorInt)
         } else fallback
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         fallback
     }
 }

@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.common.CategoryMapper
 import com.saico.mimercado.core.model.CartItem
 import com.saico.mimercado.core.model.Product
-import com.saico.mimercado.core.model.ShoppingListType
 import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.ProductCard
@@ -186,7 +185,7 @@ fun ShoppingListDetailScreen(
                                 },
                                 leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
                             )
-                            if (uiState.list?.type == ShoppingListType.CUSTOM) {
+                            if (uiState.list?.type == com.saico.mimercado.core.model.ShoppingListType.CUSTOM) {
                                 DropdownMenuItem(
                                     text = { Text("Eliminar lista", color = MaterialTheme.colorScheme.error) },
                                     onClick = {

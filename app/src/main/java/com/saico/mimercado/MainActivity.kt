@@ -51,6 +51,8 @@ import com.saico.mimercado.core.ui.theme.MiMercadoTheme
 import com.saico.mimercado.feature.auth.navigation.authGraph
 import com.saico.mimercado.feature.cart.CartViewModel
 import com.saico.mimercado.feature.cart.navigation.cartGraph
+import com.saico.mimercado.feature.customproduct.navigation.customProductGraph
+import com.saico.mimercado.feature.lists.navigation.listsGraph
 import com.saico.mimercado.feature.products.navigation.productsGraph
 import com.saico.mimercado.feature.search.navigation.searchGraph
 import com.saico.mimercado.feature.settings.navigation.settingsGraph
@@ -238,6 +240,8 @@ private fun MainContainer(
                 onSignInSuccess = {},
                 fcmManager = (navController.context as MainActivity).fcmManager
             )
+            listsGraph(navigator = navigator)
+            customProductGraph(navigator = navigator)
             productsGraph(
                 totalCartItems = 0,
                 errorMessages = cartViewModel.errorMessages,

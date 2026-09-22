@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -46,7 +46,6 @@ class ShoppingListsViewModel @Inject constructor(
                         if (householdId.isBlank()) {
                             flowOf(ShoppingListsUiState(isLoading = false, error = "No tienes una familia asignada"))
                         } else {
-                            // Launch ensureMainList asynchronously so it never blocks or fails flow subscription
                             viewModelScope.launch {
                                 shoppingListUseCases.ensureMainList(householdId, uid)
                             }

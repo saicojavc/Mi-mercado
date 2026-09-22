@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.lists
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -47,8 +47,8 @@ data class ShoppingListDetailUiState(
     val members: List<HouseholdMember> = emptyList(),
     val favorites: List<Product> = emptyList(),
     val activeTab: ExplorationTab = ExplorationTab.FAVORITES,
-    val selectedFavoriteCategory: String? = null, // null = colapsado
-    val selectedCatalogCategory: String? = null,  // null = colapsado
+    val selectedFavoriteCategory: String? = null,
+    val selectedCatalogCategory: String? = null,
     val categoryProductsMap: Map<String, List<Product>> = emptyMap(),
     val isLoadingCategoryProducts: Boolean = false,
     val quickAddText: String = "",
@@ -111,6 +111,7 @@ class ShoppingListDetailViewModel @Inject constructor(
                                     categoryProductsMap = _uiState.value.categoryProductsMap,
                                     isLoadingCategoryProducts = _uiState.value.isLoadingCategoryProducts,
                                     quickAddText = _uiState.value.quickAddText,
+                                    toastMessage = _uiState.value.toastMessage,
                                     currentUserUid = uid,
                                     currentUserDisplayName = currentMember?.displayName ?: authUser?.displayName ?: "Usuario",
                                     currentUserAvatar = currentMember?.avatarIcon,
@@ -160,12 +161,12 @@ class ShoppingListDetailViewModel @Inject constructor(
         }
     }
 
-    fun onQuickAddTextChanged(text: String) {
-        _uiState.update { it.copy(quickAddText = text) }
-    }
-
     fun clearToast() {
         _uiState.update { it.copy(toastMessage = null) }
+    }
+
+    fun onQuickAddTextChanged(text: String) {
+        _uiState.update { it.copy(quickAddText = text) }
     }
 
     fun confirmQuickAdd() {
