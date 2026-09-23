@@ -11,8 +11,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +54,7 @@ fun ProductListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.filteredProducts.collectAsState()
+    val favorites by viewModel.favorites.collectAsState()
 
     val categories = viewModel.categories
     var showScanner by remember { mutableStateOf(false) }

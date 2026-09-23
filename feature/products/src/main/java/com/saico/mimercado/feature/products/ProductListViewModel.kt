@@ -49,12 +49,15 @@ class ProductListViewModel @Inject constructor(
     private var currentUserDisplayName: String = ""
     private var currentUserAvatar: String? = null
 
+    val favorites: StateFlow<List<Product>> = useCases.getFavorites()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val filteredProducts: StateFlow<List<DecoratedProduct>> = combine(
         _uiState,
         _discoverProducts,
-        useCases.getFavorites()
-    ) { state, discover, favorites ->
-        val baseList = if (state.listMode == ListMode.HABITUAL) favorites else discover
+        favorites
+    ) { state, discover, favs ->
+        val baseList = if (state.listMode == ListMode.HABITUAL) favs else discover
 
         val filtered = baseList.filter { product ->
             val matchesCategory = state.selectedCategory == "Todos" || CategoryMapper.matchesSmart(product.categoria, product.nombre, state.selectedCategory)
@@ -159,6 +162,15 @@ class ProductListViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun toggleFavorite(product: Product) {
+        viewModelScope.launch {
+            val wasFav = favorites.value.any { it.id == product.id }
+            useCases.toggleFavorite(product)
+            val toastText = if (wasFav) "Quitado de Favoritos" else "¡'${product.nombre}' guardado en Favoritos!"
+            _uiState.update { it.copy(toastMessage = toastText) }
         }
     }
 

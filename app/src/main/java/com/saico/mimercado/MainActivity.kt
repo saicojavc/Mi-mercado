@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -143,14 +144,12 @@ private fun MainContainer(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val currentRoute = currentDestination?.route ?: ""
 
-    val showBottomNav = currentRoute.contains("ShoppingListsRoute", ignoreCase = true) ||
-            currentRoute.contains("ProfileRoute", ignoreCase = true) ||
-            currentRoute.contains("ProductsRoute", ignoreCase = true) ||
-            currentRoute.contains("shopping_lists", ignoreCase = true) ||
-            currentRoute.contains("profile", ignoreCase = true) ||
-            currentRoute.contains("products", ignoreCase = true)
+    val isListsSelected = currentDestination?.hasRoute<ShoppingListsRoute>() == true
+    val isCatalogSelected = currentDestination?.hasRoute<ProductsRoute>() == true
+    val isProfileSelected = currentDestination?.hasRoute<ProfileRoute>() == true
+
+    val showBottomNav = isListsSelected || isCatalogSelected || isProfileSelected
 
     Scaffold(
         bottomBar = {
@@ -180,10 +179,6 @@ private fun MainContainer(
                                 .height(72.dp)
                                 .padding(top = 4.dp, bottom = 4.dp)
                         ) {
-                            val isListsSelected = currentRoute.contains("lists", ignoreCase = true)
-                            val isCatalogSelected = currentRoute.contains("products", ignoreCase = true) && !isListsSelected
-                            val isProfileSelected = currentRoute.contains("profile", ignoreCase = true)
-
                             NavigationBarItem(
                                 selected = isListsSelected,
                                 onClick = {
