@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.util.AvatarUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +38,9 @@ fun ProfileScreen(
     var showAvatarPicker by remember { mutableStateOf(false) }
     var familyNameInput by remember { mutableStateOf("") }
 
+    var showRenameFamilyDialog by remember { mutableStateOf(false) }
+    var familyNameEditInput by remember { mutableStateOf("") }
+
     if (showAvatarPicker) {
         AvatarPickerDialog(
             onDismiss = { showAvatarPicker = false },
@@ -46,6 +50,59 @@ fun ProfileScreen(
                 }
                 showAvatarPicker = false
             }
+        )
+    }
+
+    if (showRenameFamilyDialog) {
+        AlertDialog(
+            onDismissRequest = { showRenameFamilyDialog = false },
+            title = {
+                Text("Renombrar Familia", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Escribe el nuevo nombre para tu hogar:", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    OutlinedTextField(
+                        value = familyNameEditInput,
+                        onValueChange = { familyNameEditInput = it },
+                        label = { Text("Nombre de la familia", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.updateHouseholdName(familyNameEditInput)
+                        showRenameFamilyDialog = false
+                    },
+                    enabled = familyNameEditInput.isNotBlank(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
+                ) {
+                    Text("Guardar Cambios", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameFamilyDialog = false }) {
+                    Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(20.dp)
         )
     }
 
@@ -60,227 +117,285 @@ fun ProfileScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // USER PROFILE HEADER
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if (uiState.isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // USER PROFILE HEADER
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Surface(
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clickable { showAvatarPicker = true },
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                            Row(
+                                modifier = Modifier.padding(20.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = AvatarUtils.getAvatarEmoji(uiState.userAvatar),
-                                        fontSize = 32.sp
-                                    )
+                                Surface(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clickable { showAvatarPicker = true },
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = AvatarUtils.getAvatarEmoji(uiState.userAvatar),
+                                            fontSize = 32.sp
+                                        )
+                                    }
                                 }
-                            }
 
-                            Spacer(Modifier.width(16.dp))
+                                Spacer(Modifier.width(16.dp))
 
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "¡Hola, ${uiState.userDisplayName}!",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                if (uiState.userEmail.isNotBlank()) {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = uiState.userEmail,
-                                        fontSize = 13.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        text = "¡Hola, ${uiState.userDisplayName}!",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
+                                    if (uiState.userEmail.isNotBlank()) {
+                                        Text(
+                                            text = uiState.userEmail,
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // QUICK SETTINGS TILES
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                    Spacer(Modifier.width(12.dp))
-                                    Text("Tema Oscuro", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                                }
-                                Switch(
-                                    checked = uiState.isDarkMode,
-                                    onCheckedChange = { viewModel.toggleDarkMode() }
-                                )
-                            }
-
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { viewModel.signOut() },
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                                    Spacer(Modifier.width(12.dp))
-                                    Text("Cerrar Sesión", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // HOUSEHOLD MANAGEMENT SECTION
-                val hasHousehold = uiState.household != null && uiState.household!!.id.isNotEmpty()
-
-                if (!hasHousehold) {
+                    // QUICK SETTINGS TILES
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Column(Modifier.padding(20.dp)) {
-                                Text("Sin Familia Asignada", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                                Spacer(Modifier.height(8.dp))
-                                Text("Crea una familia para compartir y sincronizar listas con los tuyos.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-
-                                Spacer(Modifier.height(16.dp))
-
-                                OutlinedTextField(
-                                    value = familyNameInput,
-                                    onValueChange = { familyNameInput = it },
-                                    label = { Text("Nombre de la familia") },
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    singleLine = true,
-                                    placeholder = { Text("Ej: Los García") }
-                                )
-
-                                Spacer(Modifier.height(12.dp))
-
-                                Button(
-                                    onClick = { viewModel.createNewHousehold(familyNameInput) },
-                                    enabled = familyNameInput.isNotBlank(),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp)
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Default.AddHome, contentDescription = null)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Crear mi Familia")
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Tema Oscuro", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                    }
+                                    Switch(
+                                        checked = uiState.isDarkMode,
+                                        onCheckedChange = { viewModel.toggleDarkMode() }
+                                    )
+                                }
+
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { viewModel.signOut() },
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Cerrar Sesión", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
+                                    }
                                 }
                             }
                         }
                     }
-                } else {
-                    uiState.household?.let { household ->
+
+                    // HOUSEHOLD MANAGEMENT SECTION
+                    val hasHousehold = uiState.household != null && uiState.household!!.id.isNotEmpty()
+
+                    if (!hasHousehold) {
                         item {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(20.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = household.name,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 22.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Spacer(Modifier.height(4.dp))
-                                    Text("Código de acceso familiar:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-
-                                    Spacer(Modifier.height(12.dp))
-
-                                    Text(
-                                        text = household.joinCode,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 32.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        letterSpacing = 4.sp,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+                                Column(Modifier.padding(20.dp)) {
+                                    Text("Sin Familia Asignada", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Crea una familia para compartir y sincronizar listas con los tuyos.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
 
                                     Spacer(Modifier.height(16.dp))
 
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                                    OutlinedTextField(
+                                        value = familyNameInput,
+                                        onValueChange = { familyNameInput = it },
+                                        label = { Text("Nombre de la familia") },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        singleLine = true,
+                                        placeholder = { Text("Ej: Los García") }
+                                    )
+
+                                    Spacer(Modifier.height(12.dp))
+
+                                    Button(
+                                        onClick = { viewModel.createNewHousehold(familyNameInput) },
+                                        enabled = familyNameInput.isNotBlank(),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        OutlinedButton(
-                                            onClick = { clipboardManager.setText(AnnotatedString(household.joinCode)) },
-                                            modifier = Modifier.weight(1f),
-                                            shape = RoundedCornerShape(10.dp)
-                                        ) {
-                                            Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            Spacer(Modifier.width(6.dp))
-                                            Text("Copiar")
-                                        }
-
-                                        Button(
-                                            onClick = {
-                                                val sendIntent = Intent().apply {
-                                                    action = Intent.ACTION_SEND
-                                                    putExtra(Intent.EXTRA_TEXT, "¡Únete a mi familia en Mi Mercado! Código: ${household.joinCode}")
-                                                    type = "text/plain"
-                                                }
-                                                context.startActivity(Intent.createChooser(sendIntent, null))
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                            shape = RoundedCornerShape(10.dp)
-                                        ) {
-                                            Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            Spacer(Modifier.width(6.dp))
-                                            Text("Compartir")
-                                        }
+                                        Icon(Icons.Default.AddHome, contentDescription = null)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Crear mi Familia")
                                     }
-
-                                    if (uiState.isCurrentUserAdult) {
-                                        Spacer(Modifier.height(8.dp))
-                                        TextButton(onClick = { viewModel.regenerateJoinCode() }, enabled = !uiState.isRegeneratingCode) {
-                                            if (uiState.isRegeneratingCode) {
-                                                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                }
+                            }
+                        }
+                    } else {
+                        uiState.household?.let { household ->
+                            item {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(20.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        val displayName = remember(household.name) {
+                                            if (household.name.startsWith("Hogar", ignoreCase = true) || household.name.startsWith("Familia", ignoreCase = true)) {
+                                                household.name
                                             } else {
-                                                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                "Hogar de ${household.name}"
+                                            }
+                                        }
+
+                                        Text(
+                                            text = "TU FAMILIA",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            letterSpacing = 1.5.sp
+                                        )
+
+                                        Spacer(Modifier.height(8.dp))
+
+                                        Text(
+                                            text = displayName,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                        )
+
+                                        Spacer(Modifier.height(8.dp))
+
+                                        OutlinedButton(
+                                            onClick = {
+                                                familyNameEditInput = household.name
+                                                showRenameFamilyDialog = true
+                                            },
+                                            shape = RoundedCornerShape(12.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                                                contentColor = MaterialTheme.colorScheme.secondary
+                                            ),
+                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                text = "Cambiar nombre de la familia",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
+
+                                        Spacer(Modifier.height(16.dp))
+                                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                        Spacer(Modifier.height(12.dp))
+
+                                        Text("Código de acceso familiar:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+
+                                        Spacer(Modifier.height(8.dp))
+
+                                        Text(
+                                            text = household.joinCode,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 32.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            letterSpacing = 4.sp,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { clipboardManager.setText(AnnotatedString(household.joinCode)) },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp)
+                                            ) {
+                                                Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                                                 Spacer(Modifier.width(6.dp))
-                                                Text("Regenerar código", fontSize = 13.sp)
+                                                Text("Copiar")
+                                            }
+
+                                            Button(
+                                                onClick = {
+                                                    val sendIntent = Intent().apply {
+                                                        action = Intent.ACTION_SEND
+                                                        putExtra(Intent.EXTRA_TEXT, "¡Únete a mi familia en Mi Mercado! Código: ${household.joinCode}")
+                                                        type = "text/plain"
+                                                    }
+                                                    context.startActivity(Intent.createChooser(sendIntent, null))
+                                                },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp)
+                                            ) {
+                                                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text("Compartir")
+                                            }
+                                        }
+
+                                        if (uiState.isCurrentUserAdult) {
+                                            Spacer(Modifier.height(8.dp))
+                                            TextButton(onClick = { viewModel.regenerateJoinCode() }, enabled = !uiState.isRegeneratingCode) {
+                                                if (uiState.isRegeneratingCode) {
+                                                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                } else {
+                                                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Text("Regenerar código", fontSize = 13.sp)
+                                                }
                                             }
                                         }
                                     }
@@ -288,81 +403,89 @@ fun ProfileScreen(
                             }
                         }
                     }
-                }
 
-                // JOIN OTHER HOUSEHOLD CARD
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text("Unirse a otra familia", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Spacer(Modifier.height(4.dp))
-                            Text("Ingresa el código de 6 caracteres:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                    // JOIN OTHER HOUSEHOLD CARD
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text("Unirse a otra familia", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(Modifier.height(4.dp))
+                                Text("Ingresa el código de 6 caracteres:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
 
-                            Spacer(Modifier.height(12.dp))
+                                Spacer(Modifier.height(12.dp))
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                OutlinedTextField(
-                                    value = uiState.joinCodeInput,
-                                    onValueChange = { if (it.length <= 6) viewModel.onJoinCodeInputChanged(it) },
-                                    label = { Text("Código") },
-                                    singleLine = true,
-                                    modifier = Modifier.weight(1f)
-                                )
-
-                                Button(
-                                    onClick = { viewModel.joinHouseholdWithCode() },
-                                    enabled = uiState.joinCodeInput.trim().length == 6 && !uiState.isJoining,
-                                    shape = RoundedCornerShape(10.dp),
-                                    modifier = Modifier.height(56.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    if (uiState.isJoining) {
-                                        CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                                    } else {
-                                        Icon(Icons.Default.GroupAdd, contentDescription = null)
+                                    OutlinedTextField(
+                                        value = uiState.joinCodeInput,
+                                        onValueChange = { if (it.length <= 6) viewModel.onJoinCodeInputChanged(it) },
+                                        label = { Text("Código") },
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f)
+                                    )
+
+                                    Button(
+                                        onClick = { viewModel.joinHouseholdWithCode() },
+                                        enabled = uiState.joinCodeInput.trim().length == 6 && !uiState.isJoining,
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.height(56.dp)
+                                    ) {
+                                        if (uiState.isJoining) {
+                                            CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                                        } else {
+                                            Icon(Icons.Default.GroupAdd, contentDescription = null)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // MEMBERS LIST
-                if (hasHousehold) {
-                    item {
-                        Text(
-                            "Integrantes de la familia",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                    // MEMBERS LIST
+                    if (hasHousehold) {
+                        item {
+                            Text(
+                                "Integrantes de la familia",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        items(uiState.members) { member ->
+                            MemberCardRow(
+                                member = member,
+                                isCurrentUser = member.uid == uiState.currentUserUid,
+                                isEditable = uiState.isCurrentUserAdult,
+                                onRoleChange = { role -> viewModel.onRoleChanged(member.uid, role) },
+                                onAvatarClick = { if (member.uid == uiState.currentUserUid) showAvatarPicker = true }
+                            )
+                        }
                     }
 
-                    items(uiState.members) { member ->
-                        MemberCardRow(
-                            member = member,
-                            isCurrentUser = member.uid == uiState.currentUserUid,
-                            isEditable = uiState.isCurrentUserAdult,
-                            onRoleChange = { role -> viewModel.onRoleChanged(member.uid, role) },
-                            onAvatarClick = { if (member.uid == uiState.currentUserUid) showAvatarPicker = true }
-                        )
-                    }
-                }
-
-                uiState.error?.let { err ->
-                    item {
-                        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                            Text(err, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.padding(12.dp), fontSize = 14.sp)
+                    uiState.error?.let { err ->
+                        item {
+                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                                Text(err, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.padding(12.dp), fontSize = 14.sp)
+                            }
                         }
                     }
                 }
             }
+
+            AppToast(
+                message = uiState.toastMessage,
+                onDismiss = viewModel::clearToast,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
     }
 }

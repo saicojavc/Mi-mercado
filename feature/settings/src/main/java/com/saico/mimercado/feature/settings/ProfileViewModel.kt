@@ -26,6 +26,7 @@ data class ProfileUiState(
     val joinCodeInput: String = "",
     val isJoining: Boolean = false,
     val isRegeneratingCode: Boolean = false,
+    val toastMessage: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -112,6 +113,24 @@ class ProfileViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false, error = error.message) }
             }
         }
+    }
+
+    fun updateHouseholdName(newName: String) {
+        val householdId = currentHouseholdId ?: return
+        val name = newName.trim()
+        if (name.isBlank()) return
+
+        viewModelScope.launch {
+            householdUseCases.updateHouseholdName(householdId, name).onSuccess {
+                _uiState.update { it.copy(toastMessage = "¡Nombre de la familia actualizado!") }
+            }.onFailure { err ->
+                _uiState.update { it.copy(error = err.message) }
+            }
+        }
+    }
+
+    fun clearToast() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 
     fun onJoinCodeInputChanged(code: String) {

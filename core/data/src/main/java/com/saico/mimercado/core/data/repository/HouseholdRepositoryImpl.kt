@@ -74,6 +74,16 @@ class HouseholdRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+    override suspend fun updateHouseholdName(householdId: String, name: String): Result<Unit> = try {
+        firestore.collection("households")
+            .document(householdId)
+            .update("name", name)
+            .await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     override fun observeHousehold(householdId: String): Flow<Household> = callbackFlow {
         val subscription = firestore.collection("households").document(householdId)
             .addSnapshotListener { snapshot, error ->
