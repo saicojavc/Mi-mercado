@@ -1,7 +1,6 @@
 package com.saico.mimercado.feature.products
 
 import android.Manifest
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,10 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,10 +33,10 @@ import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
+import com.saico.mimercado.core.ui.components.SelectListDialog
 import com.saico.mimercado.feature.products.components.BarcodeScannerView
 import com.saico.mimercado.feature.products.model.ListMode
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -55,13 +52,11 @@ fun ProductListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.filteredProducts.collectAsState()
-    val favorites by viewModel.uiState.collectAsState() // or check via state
 
     val categories = viewModel.categories
     var showScanner by remember { mutableStateOf(false) }
 
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-    val context = LocalContext.current
     val listState = rememberLazyListState()
 
     // Ensure ViewModel stays in DISCOVER mode
@@ -80,12 +75,6 @@ fun ProductListScreen(
     LaunchedEffect(shouldLoadMore.value) {
         if (shouldLoadMore.value) {
             viewModel.loadNextPage()
-        }
-    }
-
-    LaunchedEffect(errorMessages) {
-        errorMessages.collectLatest { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -211,8 +200,7 @@ fun ProductListScreen(
                                 trailingContent = {
                                     AddToCartButton(
                                         onClick = {
-                                            onAddToCart(decorated.product)
-                                            viewModel.showAddedToast(decorated.product.nombre)
+                                            viewModel.onAddProductClicked(decorated.product)
                                         }
                                     )
                                 }
@@ -241,6 +229,17 @@ fun ProductListScreen(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 80.dp)
                 )
+
+                uiState.targetProductForAdd?.let { product ->
+                    SelectListDialog(
+                        productName = product.nombre,
+                        lists = uiState.availableLists,
+                        onListsSelected = { selectedLists ->
+                            viewModel.addProductToMultipleLists(product, selectedLists)
+                        },
+                        onDismiss = viewModel::dismissSelectListDialog
+                    )
+                }
             }
         }
     }

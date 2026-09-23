@@ -28,6 +28,7 @@ import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.ProductImage
+import com.saico.mimercado.core.ui.components.SelectListDialog
 import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,7 +41,9 @@ fun ProductDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
-    var toastMessage by remember { mutableStateOf<String?>(null) }
+    val targetProduct by viewModel.targetProductForAdd.collectAsState()
+    val availableLists by viewModel.availableLists.collectAsState()
+    val toastMessage by viewModel.toastMessage.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -91,17 +94,7 @@ fun ProductDetailsScreen(
                     Box(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = {
-                                onAddToCart(
-                                    Product(
-                                        id = details.id,
-                                        upc = details.upc,
-                                        nombre = details.name,
-                                        categoria = details.category,
-                                        imageUrl = details.imageUrl,
-                                        brands = details.brand
-                                    )
-                                )
-                                toastMessage = "¡'${details.name}' agregado a la lista!"
+                                viewModel.onAddProductClicked(details)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -144,11 +137,22 @@ fun ProductDetailsScreen(
 
             AppToast(
                 message = toastMessage,
-                onDismiss = { toastMessage = null },
+                onDismiss = viewModel::clearToast,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp)
             )
+
+            targetProduct?.let { product ->
+                SelectListDialog(
+                    productName = product.nombre,
+                    lists = availableLists,
+                    onListsSelected = { selectedLists ->
+                        viewModel.addProductToMultipleLists(product, selectedLists)
+                    },
+                    onDismiss = viewModel::dismissSelectListDialog
+                )
+            }
         }
     }
 }
