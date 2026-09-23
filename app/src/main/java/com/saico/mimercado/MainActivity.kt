@@ -15,19 +15,25 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,16 +41,19 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
-import com.saico.mimercado.core.ui.components.PersistentCartBar
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
 import com.saico.mimercado.core.ui.navigation.routes.Route
-import com.saico.mimercado.core.ui.navigation.routes.cart.CartRoute
+import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListsRoute
+import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
+import com.saico.mimercado.core.ui.navigation.routes.profile.ProfileRoute
 import com.saico.mimercado.core.ui.theme.MiMercadoTheme
 import com.saico.mimercado.feature.auth.navigation.authGraph
 import com.saico.mimercado.feature.cart.CartViewModel
 import com.saico.mimercado.feature.cart.navigation.cartGraph
+import com.saico.mimercado.feature.customproduct.navigation.customProductGraph
+import com.saico.mimercado.feature.lists.navigation.listsGraph
 import com.saico.mimercado.feature.products.navigation.productsGraph
 import com.saico.mimercado.feature.search.navigation.searchGraph
 import com.saico.mimercado.feature.settings.navigation.settingsGraph
@@ -91,7 +100,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val startDestination by viewModel.startDestination.collectAsState()
-                    
+
                     LaunchedEffect(startDestination) {
                         startDestination?.let { destination ->
                             navController.navigate(destination) {
@@ -132,28 +141,88 @@ private fun MainContainer(
     navigator: Navigator
 ) {
     val cartViewModel: CartViewModel = hiltViewModel()
-    val cartUiState by cartViewModel.uiState.collectAsState()
-    val totalItems = cartUiState.items.sumOf { it.cantidad }
-    
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    val isListsSelected = currentDestination?.hasRoute<ShoppingListsRoute>() == true
+    val isCatalogSelected = currentDestination?.hasRoute<ProductsRoute>() == true
+    val isProfileSelected = currentDestination?.hasRoute<ProfileRoute>() == true
+
+    val showBottomNav = isListsSelected || isCatalogSelected || isProfileSelected
+
     Scaffold(
         bottomBar = {
-            val route = currentDestination?.route ?: ""
-            // Verificamos si estamos en una de las rutas que deben mostrar la barra
-            val isExplorationRoute = route.contains("ProductsRoute", ignoreCase = true) ||
-                                    route.contains("SearchRoute", ignoreCase = true)
-            
             AnimatedVisibility(
-                visible = isExplorationRoute && totalItems > 0,
+                visible = showBottomNav,
                 enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
             ) {
-                PersistentCartBar(
-                    totalItems = totalItems,
-                    onClick = { navigator.navigate(NavigationCommand.NavigateTo(CartRoute)) }
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 6.dp,
+                        shadowElevation = 8.dp
+                    ) {
+                        NavigationBar(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            tonalElevation = 0.dp,
+                            modifier = Modifier
+                                .height(72.dp)
+                                .padding(top = 4.dp, bottom = 4.dp)
+                        ) {
+                            NavigationBarItem(
+                                selected = isListsSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ShoppingListsRoute))
+                                },
+                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Listas") },
+                                label = { Text("Mis Listas", fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+
+                            NavigationBarItem(
+                                selected = isCatalogSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ProductsRoute))
+                                },
+                                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Catálogo") },
+                                label = { Text("Catálogo", fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+
+                            NavigationBarItem(
+                                selected = isProfileSelected,
+                                onClick = {
+                                    navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
+                                },
+                                icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") },
+                                label = { Text("Perfil", fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -166,8 +235,10 @@ private fun MainContainer(
                 onSignInSuccess = {},
                 fcmManager = (navController.context as MainActivity).fcmManager
             )
+            listsGraph(navigator = navigator)
+            customProductGraph(navigator = navigator)
             productsGraph(
-                totalCartItems = totalItems,
+                totalCartItems = 0,
                 errorMessages = cartViewModel.errorMessages,
                 onAddToCart = { cartViewModel.addToCart(it) },
                 navigator = navigator

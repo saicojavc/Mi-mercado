@@ -288,9 +288,9 @@ fun MemberCardRow(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(
@@ -299,7 +299,7 @@ fun MemberCardRow(
                     .clickable(enabled = isCurrentUser, onClick = onAvatarClick),
                 shape = CircleShape, 
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                border = if (isCurrentUser) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+                border = if (isCurrentUser) BorderStroke(2.dp, MaterialTheme.colorScheme.secondary) else null
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -310,7 +310,7 @@ fun MemberCardRow(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.1f)),
+                                .background(Color.Black.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.BottomEnd
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
@@ -323,11 +323,12 @@ fun MemberCardRow(
                 Text(
                     text = if (isCurrentUser) "${member.displayName} (Tú)" else member.displayName, 
                     fontWeight = FontWeight.Bold, 
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = if (member.role == MemberRole.ADULT) "Adulto (Comprador)" else "Menor (Sugeridor)",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp
                 )
             }
@@ -350,7 +351,7 @@ fun AvatarPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Elige tu Avatar", fontWeight = FontWeight.Bold) },
+        title = { Text("Elige tu Avatar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) },
         text = {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -375,7 +376,9 @@ fun AvatarPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
+            TextButton(onClick = onDismiss) { Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp)
     )
 }

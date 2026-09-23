@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.customproduct
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.saico.mimercado.feature.products.model.CreateCustomProductUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,14 +37,18 @@ fun CreateCustomProductScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(if (uiState.isEditing) "Editar Producto" else "Nuevo Producto") },
+                title = { Text(if (uiState.isEditing) "Editar Producto" else "Nuevo Producto Personalizado", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->
@@ -53,15 +56,21 @@ fun CreateCustomProductScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = viewModel::onNameChanged,
                 label = { Text("Nombre del producto") },
+                placeholder = { Text("Ej: Leche de Almendras especial") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
             )
 
             CategoryDropdown(
@@ -69,8 +78,8 @@ fun CreateCustomProductScreen(
                 onCategorySelected = viewModel::onCategoryChanged
             )
 
-            Text("Imagen (Sugerencias)", fontWeight = FontWeight.Bold)
-            
+            Text("Sugerencias de Imagen", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -78,15 +87,20 @@ fun CreateCustomProductScreen(
             ) {
                 Button(
                     onClick = viewModel::searchImages,
-                    enabled = uiState.name.isNotBlank() && !uiState.isSearchingImages
+                    enabled = uiState.name.isNotBlank() && !uiState.isSearchingImages,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
                 ) {
                     Icon(Icons.Default.ImageSearch, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Buscar fotos")
+                    Text("Buscar fotos", fontWeight = FontWeight.Bold)
                 }
-                
+
                 if (uiState.isSearchingImages) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.secondary)
                 }
             }
 
@@ -105,10 +119,10 @@ fun CreateCustomProductScreen(
                             contentDescription = null,
                             modifier = Modifier
                                 .aspectRatio(1f)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(12.dp))
                                 .clickable { viewModel.onImageSelected(result.thumbnailUrl) }
                                 .then(
-                                    if (isSelected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                    if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
                                     else Modifier
                                 ),
                             contentScale = ContentScale.Crop
@@ -120,7 +134,8 @@ fun CreateCustomProductScreen(
                     if (uiState.selectedImageUrl != null) {
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             AsyncImage(
                                 model = uiState.selectedImageUrl,
@@ -130,21 +145,27 @@ fun CreateCustomProductScreen(
                             )
                         }
                     } else {
-                        Text("Escribe un nombre para ver sugerencias", color = Color.Gray)
+                        Text("Escribe un nombre para buscar sugerencias", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
 
             Button(
                 onClick = viewModel::save,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
                 enabled = uiState.name.isNotBlank() && !uiState.isSaving,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
             ) {
                 if (uiState.isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                 } else {
-                    Text(if (uiState.isEditing) "Guardar Cambios" else "Crear Producto", fontWeight = FontWeight.Bold)
+                    Text(if (uiState.isEditing) "Guardar Cambios" else "Crear Producto", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
 
@@ -174,7 +195,12 @@ fun CategoryDropdown(
             readOnly = true,
             label = { Text("Categoría") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth()
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+            )
         )
 
         ExposedDropdownMenu(

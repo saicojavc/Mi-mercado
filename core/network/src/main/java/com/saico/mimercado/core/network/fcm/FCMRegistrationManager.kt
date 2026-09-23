@@ -16,37 +16,25 @@ class FCMRegistrationManager @Inject constructor(
 ) {
     fun registerDeviceToken() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        
-        firestore.collection("users").document(uid).get().addOnSuccessListener { userSnapshot ->
-            val householdId = userSnapshot.getString("householdId") ?: "familia_valdes"
-            
-            val userRef = firestore.collection("households").document(householdId)
-                .collection("users").document(uid)
-            
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val token = task.result
-                    val username = userSnapshot.getString("displayName") ?: ("Usuario " + uid.takeLast(4))
-                    
-                    val initialData = mapOf(
-                        "deviceToken" to token,
-                        "lastSeen" to System.currentTimeMillis(),
-                        "username" to username,
-                        "avatarIcon" to "fox_blue",
-                        "role" to "ADULT"
-                    )
 
-                    userRef.set(initialData, SetOptions.merge()).addOnSuccessListener {
-                        Log.d("FCMRegistration", "✅ User registration and device token updated successfully on Firestore under household $householdId")
-                    }.addOnFailureListener { e ->
-                        Log.e("FCMRegistration", "❌ Failed to update user registration on Firestore", e)
-                    }
-                } else {
-                    Log.e("FCMRegistration", "❌ Failed to retrieve FCM token", task.exception)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                val userRef = firestore.collection("users").document(uid)
+
+                val tokenData = mapOf(
+                    "fcmToken" to token,
+                    "lastSeen" to System.currentTimeMillis()
+                )
+
+                userRef.set(tokenData, SetOptions.merge()).addOnSuccessListener {
+                    Log.d("FCMRegistration", "✅ FCM device token updated successfully on users/$uid")
+                }.addOnFailureListener { e ->
+                    Log.e("FCMRegistration", "❌ Failed to update user registration on Firestore", e)
                 }
+            } else {
+                Log.e("FCMRegistration", "❌ Failed to retrieve FCM token", task.exception)
             }
-        }.addOnFailureListener { e ->
-            Log.e("FCMRegistration", "❌ Failed to fetch user profile for householdId", e)
         }
     }
 }

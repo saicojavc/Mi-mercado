@@ -1,16 +1,9 @@
 package com.saico.mimercado.feature.products
 
 import android.Manifest
-import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,23 +11,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -42,15 +32,13 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.components.AddToCartButton
+import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
-import com.saico.mimercado.core.ui.theme.AppBackground
-import com.saico.mimercado.core.ui.theme.PrimaryCyan
-import com.saico.mimercado.core.ui.theme.TextDark
+import com.saico.mimercado.core.ui.components.SelectListDialog
 import com.saico.mimercado.feature.products.components.BarcodeScannerView
 import com.saico.mimercado.feature.products.model.ListMode
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -66,15 +54,18 @@ fun ProductListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.filteredProducts.collectAsState()
-    
+    val favorites by viewModel.favorites.collectAsState()
+
     val categories = viewModel.categories
-
     var showScanner by remember { mutableStateOf(false) }
-    
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
-    val context = LocalContext.current
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val listState = rememberLazyListState()
+
+    // Ensure ViewModel stays in DISCOVER mode
+    LaunchedEffect(Unit) {
+        viewModel.setListMode(ListMode.DISCOVER)
+    }
 
     val shouldLoadMore = remember {
         derivedStateOf {
@@ -90,116 +81,54 @@ fun ProductListScreen(
         }
     }
 
-    var previousTotalItems by remember { mutableIntStateOf(totalCartItems) }
-    val badgeScale = remember { Animatable(1f) }
-
-    LaunchedEffect(totalCartItems) {
-        if (totalCartItems > previousTotalItems) {
-            badgeScale.animateTo(1.5f, animationSpec = tween(100))
-            badgeScale.animateTo(1f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-        }
-        previousTotalItems = totalCartItems
-    }
-
-    LaunchedEffect(errorMessages) {
-        errorMessages.collectLatest { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = AppBackground,
-        topBar = {
-            Column {
-                TopAppBar(
-                    title = { 
-                        Text(
-                            text = stringResource(com.saico.mimercado.core.ui.R.string.app_name),
-                            fontWeight = FontWeight.Bold
-                        ) 
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = AppBackground,
-                        titleContentColor = TextDark
-                    ),
-                    actions = {
-                        if (uiState.listMode == ListMode.HABITUAL) {
-                            IconButton(onClick = onCreateCustomProductClick) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Añadir Producto Personalizado",
-                                    tint = PrimaryCyan
-                                )
-                            }
-                        }
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Ajustes del Hogar",
-                                tint = PrimaryCyan
-                            )
-                        }
-                        IconButton(onClick = { viewModel.navigateToCart() }) {
-                            BadgedBox(
-                                badge = {
-                                    if (totalCartItems > 0) {
-                                        Badge(
-                                            modifier = Modifier.scale(badgeScale.value),
-                                            containerColor = MaterialTheme.colorScheme.error,
-                                            contentColor = MaterialTheme.colorScheme.onError
-                                        ) {
-                                            Text(totalCartItems.toString())
-                                        }
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ShoppingCart,
-                                    contentDescription = stringResource(R.string.view_cart),
-                                    tint = PrimaryCyan
-                                )
-                            }
-                        }
-                    }
-                )
-                
-                SecondaryTabRow(
-                    selectedTabIndex = uiState.listMode.ordinal,
-                    containerColor = AppBackground,
-                    contentColor = PrimaryCyan
-                ) {
-                    Tab(
-                        selected = uiState.listMode == ListMode.HABITUAL,
-                        onClick = { viewModel.setListMode(ListMode.HABITUAL) },
-                        text = { Text("Habitual", fontWeight = FontWeight.Bold) }
-                    )
-                    Tab(
-                        selected = uiState.listMode == ListMode.DISCOVER,
-                        onClick = { viewModel.setListMode(ListMode.DISCOVER) },
-                        text = { Text("Discover", fontWeight = FontWeight.Bold) }
-                    )
-                }
-            }
-        },
-        floatingActionButton = {}
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Header Title with Create Custom Action
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Catálogo de Productos",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                IconButton(onClick = onCreateCustomProductClick) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Crear producto personalizado",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+
+            // Search Bar & Scanner Button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = uiState.searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text(if (uiState.listMode == ListMode.HABITUAL) "Search habituals..." else "Search products or UPC...") },
+                    placeholder = { Text("Buscar productos o código de barras...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
-                        IconButton(onClick = { 
+                        IconButton(onClick = {
                             if (cameraPermissionState.status.isGranted) {
                                 showScanner = true
                             } else {
@@ -208,101 +137,79 @@ fun ProductListScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.QrCodeScanner,
-                                contentDescription = "Scan Barcode",
+                                contentDescription = "Escanear Código",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
                     singleLine = true,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             }
 
+            // Category Filter Chips
             CategoryFilter(
                 categories = categories,
                 selectedCategory = uiState.selectedCategory,
                 onCategorySelected = { viewModel.selectCategory(it) }
             )
-            
+
+            // Products List
             Box(modifier = Modifier.fillMaxSize()) {
                 if (uiState.isLoading && products.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (products.isEmpty() && !uiState.isLoading) {
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = if (uiState.listMode == ListMode.HABITUAL) "No habitual products yet." else "No products found.",
-                            color = Color.Gray
+                            text = "No se encontraron productos.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp
                         )
-                        if (uiState.listMode == ListMode.DISCOVER) {
-                            Spacer(Modifier.height(16.dp))
-                            Button(onClick = { onCreateCustomProductClick() }) {
-                                Text("Añadir producto manualmente")
-                            }
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = onCreateCustomProductClick,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Añadir producto manualmente")
                         }
                     }
                 } else {
-                    val isHabitual = uiState.listMode == ListMode.HABITUAL
-                    val showCollapsedHeader = isHabitual && !uiState.isCatalogExpanded && uiState.searchQuery.isBlank() && uiState.selectedCategory == "Todos"
-
                     LazyColumn(
                         state = listState,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
-                        if (showCollapsedHeader) {
-                            item {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    onClick = { viewModel.toggleCatalogExpanded() },
-                                    shape = MaterialTheme.shapes.medium,
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(16.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            "Ver mis productos habituales (${products.size})",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowDown,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                        items(products, key = { it.product.id }) { decorated ->
+                            ProductCard(
+                                product = decorated.product,
+                                onClick = { onProductClick(decorated.product) },
+                                additionalBrandsCount = decorated.additionalBrandsCount,
+                                onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
+                                onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
+                                trailingContent = {
+                                    AddToCartButton(
+                                        onClick = {
+                                            viewModel.onAddProductClicked(decorated.product)
+                                        }
+                                    )
                                 }
-                            }
-                        } else {
-                            items(products, key = { it.product.id }) { decorated ->
-                                ProductCard(
-                                    product = decorated.product,
-                                    onClick = { onProductClick(decorated.product) },
-                                    additionalBrandsCount = decorated.additionalBrandsCount,
-                                    onGetCachedUrl = { viewModel.imageCache.getVerifiedUrl(it) },
-                                    onSaveCachedUrl = { key, url -> viewModel.imageCache.saveVerifiedUrl(key, url) },
-                                    trailingContent = {
-                                        AddToCartButton(
-                                            onClick = { onAddToCart(decorated.product) }
-                                        )
-                                    }
-                                )
-                            }
+                            )
                         }
-                        
+
                         if (uiState.isPaginating) {
                             item {
                                 Box(
@@ -316,6 +223,25 @@ fun ProductListScreen(
                             }
                         }
                     }
+                }
+
+                AppToast(
+                    message = uiState.toastMessage,
+                    onDismiss = viewModel::clearToast,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 80.dp)
+                )
+
+                uiState.targetProductForAdd?.let { product ->
+                    SelectListDialog(
+                        productName = product.nombre,
+                        lists = uiState.availableLists,
+                        onListsSelected = { selectedLists ->
+                            viewModel.addProductToMultipleLists(product, selectedLists)
+                        },
+                        onDismiss = viewModel::dismissSelectListDialog
+                    )
                 }
             }
         }
@@ -333,7 +259,7 @@ fun ProductListScreen(
                         viewModel.onSearchQueryChanged(barcode, isScan = true)
                     }
                 )
-                
+
                 IconButton(
                     onClick = { showScanner = false },
                     modifier = Modifier
@@ -342,7 +268,7 @@ fun ProductListScreen(
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.5f))
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                    Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -40,10 +41,10 @@ fun ProductCard(
 ) {
     val upc = remember(product.upc) { product.upc.filter { it.isDigit() } }
     val cacheKey = remember(product.id, product.upc) { product.upc.ifBlank { product.id } }
-    
+
     val candidateUrls = remember(upc, product.imageUrl, product.nombre) {
         val list = mutableListOf<String>()
-        
+
         // 0. PRIORIDAD MÁXIMA: Caché verificada (Instantáneo)
         onGetCachedUrl?.invoke(cacheKey)?.let { cached ->
             if (cached.isNotBlank()) list.add(cached)
@@ -51,17 +52,17 @@ fun ProductCard(
 
         // 1. URL de la API (Si viene de Discover con imagen)
         if (product.imageUrl.isNotBlank()) list.add(product.imageUrl)
-        
+
         // 2. Búsqueda Rápida (Bing) - Es el "Salvavidas" que carga en milisegundos
         list.add(UsdaImageResolver.getSearchThumbnailUrl(product.brands, product.nombre))
-        
+
         // 3. Intentos de Alta Calidad (Solo si los anteriores no existen o fallan)
         if (upc.isNotEmpty()) {
             list.add(UsdaImageResolver.buildWalmartUrl(upc))
             list.add(UsdaImageResolver.buildOffUrl(upc))
         }
-        
-        list.distinct().filter { it.isNotBlank() } 
+
+        list.distinct().filter { it.isNotBlank() }
     }
 
     val normalizedCategory = remember(product.categoria, product.nombre) {
@@ -74,19 +75,20 @@ fun ProductCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onClick() },
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Accent bar
+            // Accent bar with rounded outer corner
             Box(
                 modifier = Modifier
                     .width(6.dp)
                     .fillMaxHeight()
+                    .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
                     .background(categoryColor)
             )
 
@@ -119,22 +121,23 @@ fun ProductCard(
                         Text(
                             text = product.nombre,
                             style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             modifier = Modifier.weight(1f, fill = false)
                         )
-                        
+
                         if (product.isCustom) {
                             Surface(
                                 color = MaterialTheme.colorScheme.tertiary,
-                                shape = MaterialTheme.shapes.extraSmall,
+                                shape = RoundedCornerShape(6.dp),
                                 modifier = Modifier.padding(start = 2.dp)
                             ) {
                                 Text(
                                     text = "Personalizado",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onTertiary,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
                         }
@@ -156,17 +159,17 @@ fun ProductCard(
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
                         Surface(
-                            color = categoryColor.copy(alpha = 0.15f),
-                            shape = MaterialTheme.shapes.extraSmall
+                            color = categoryColor.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = normalizedCategory,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = categoryColor,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
-                        
+
                         subContent?.invoke(this@Column)
                     }
                 }
@@ -195,7 +198,7 @@ fun AddToCartButton(
             .size(40.dp)
             .scale(scale)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.secondary)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -206,7 +209,7 @@ fun AddToCartButton(
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = stringResource(R.string.add_to_cart),
-            tint = Color.White,
+            tint = MaterialTheme.colorScheme.onSecondary,
             modifier = Modifier.size(20.dp)
         )
     }

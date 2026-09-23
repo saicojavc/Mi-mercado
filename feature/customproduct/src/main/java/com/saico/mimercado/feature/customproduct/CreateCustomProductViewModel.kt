@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products
+package com.saico.mimercado.feature.customproduct
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -6,15 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.saico.mimercado.core.common.UsdaImageResolver
 import com.saico.mimercado.core.domain.usecase.products.ProductsUseCases
-import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
-import com.saico.mimercado.feature.products.model.CreateCustomProductUiState
+import com.saico.mimercado.feature.customproduct.model.CreateCustomProductUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,7 +22,7 @@ class CreateCustomProductViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val route: CreateCustomProductRoute = savedStateHandle.toRoute()
-    
+
     private val _uiState = MutableStateFlow(CreateCustomProductUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -33,7 +31,7 @@ class CreateCustomProductViewModel @Inject constructor(
             name = route.prefillName ?: "",
             isEditing = route.editingProductId != null
         ) }
-        
+
         if (route.editingProductId != null) {
             loadExistingProduct(route.editingProductId!!)
         }
@@ -95,7 +93,7 @@ class CreateCustomProductViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
-            
+
             useCases.createCustomProduct(
                 nombre = state.name,
                 categoria = state.category,

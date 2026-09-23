@@ -6,12 +6,10 @@ import androidx.navigation.compose.composable
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
-import com.saico.mimercado.core.ui.navigation.routes.household.HouseholdSettingsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductsRoute
-import com.saico.mimercado.feature.products.CreateCustomProductScreen
-import com.saico.mimercado.feature.products.CreateCustomProductViewModel
+import com.saico.mimercado.core.ui.navigation.routes.profile.ProfileRoute
 import com.saico.mimercado.feature.products.ProductDetailsScreen
 import com.saico.mimercado.feature.products.ProductDetailsViewModel
 import com.saico.mimercado.feature.products.ProductListScreen
@@ -39,7 +37,7 @@ fun NavGraphBuilder.productsGraph(
                 navigator.navigate(NavigationCommand.NavigateTo(CreateCustomProductRoute(prefillName = query.ifBlank { null })))
             },
             onSettingsClick = {
-                navigator.navigate(NavigationCommand.NavigateTo(HouseholdSettingsRoute))
+                navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
             }
         )
     }
@@ -55,15 +53,4 @@ fun NavGraphBuilder.productsGraph(
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
         )
     }
-
-    composable<CreateCustomProductRoute> {
-        val viewModel: CreateCustomProductViewModel = hiltViewModel()
-        CreateCustomProductScreen(
-            viewModel = viewModel,
-            onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) }
-        )
-    }
-
-    // Removida la declaración duplicada de HouseholdSettingsRoute.
-    // Ahora es administrada de forma centralizada por el nuevo módulo :feature:settings
 }

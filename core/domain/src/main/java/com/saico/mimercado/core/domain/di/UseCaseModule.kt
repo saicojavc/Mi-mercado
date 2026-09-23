@@ -61,6 +61,7 @@ object UseCaseModule {
     ): HouseholdUseCases {
         return HouseholdUseCases(
             createHousehold = CreateHouseholdUseCase(householdRepository, userRepository),
+            updateHouseholdName = UpdateHouseholdNameUseCase(householdRepository),
             observeHousehold = ObserveHouseholdUseCase(householdRepository),
             observeMembers = ObserveHouseholdMembersUseCase(householdRepository),
             updateMemberRole = UpdateMemberRoleUseCase(householdRepository),

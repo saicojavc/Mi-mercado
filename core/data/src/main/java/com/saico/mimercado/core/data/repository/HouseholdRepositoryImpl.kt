@@ -52,7 +52,34 @@ class HouseholdRepositoryImpl @Inject constructor(
         householdRef.collection("members").document(ownerUid).set(memberData).await()
         firestore.collection("joinCodes").document(joinCode).set(mapOf("householdId" to householdId)).await()
 
+        // Crear la lista principal (MAIN) por defecto con ID "main"
+        val mainListRef = householdRef.collection("lists").document("main")
+        val mainListData = mapOf(
+            "id" to "main",
+            "householdId" to householdId,
+            "name" to "Principal",
+            "type" to "MAIN",
+            "coverTheme" to mapOf(
+                "colorStart" to "#0F172A",
+                "colorEnd" to "#06B6D4",
+                "icon" to "home"
+            ),
+            "createdBy" to ownerUid,
+            "createdAt" to System.currentTimeMillis()
+        )
+        mainListRef.set(mainListData).await()
+
         Result.success(householdId)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun updateHouseholdName(householdId: String, name: String): Result<Unit> = try {
+        firestore.collection("households")
+            .document(householdId)
+            .update("name", name)
+            .await()
+        Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
     }

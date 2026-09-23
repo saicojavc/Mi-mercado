@@ -64,6 +64,8 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
     implementation(project(":feature:products"))
+    implementation(project(":feature:lists"))
+    implementation(project(":feature:customproduct"))
     implementation(project(":feature:cart"))
     implementation(project(":feature:search"))
     implementation(project(":feature:auth"))

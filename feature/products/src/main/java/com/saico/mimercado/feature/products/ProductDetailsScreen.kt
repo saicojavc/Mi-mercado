@@ -6,38 +6,29 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.saico.mimercado.core.common.UsdaImageResolver
-import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
+import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.ProductImage
-import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
-import com.saico.mimercado.core.ui.theme.AppBackground
-import com.saico.mimercado.core.ui.theme.PrimaryCyan
-import com.saico.mimercado.core.ui.theme.SecondaryTeal
-import com.saico.mimercado.core.ui.theme.TextDark
+import com.saico.mimercado.core.ui.components.SelectListDialog
 import com.saico.mimercado.feature.products.model.ProductDetailsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,84 +41,88 @@ fun ProductDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
+    val targetProduct by viewModel.targetProductForAdd.collectAsState()
+    val availableLists by viewModel.availableLists.collectAsState()
+    val toastMessage by viewModel.toastMessage.collectAsState()
 
     Scaffold(
-        containerColor = AppBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Product Details") },
+                title = { Text("Detalles del Producto", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
                     }
                 },
                 actions = {
                     if (uiState is ProductDetailsUiState.Success) {
                         val details = (uiState as ProductDetailsUiState.Success).details
                         val isCustomProduct = details.ingredients == "Producto personalizado"
-                        
+
                         IconButton(onClick = { viewModel.toggleFavorite(details) }) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                tint = if (isFavorite) Color.Red else Color.Gray
+                                contentDescription = "Favorito",
+                                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
                         if (isCustomProduct) {
                             IconButton(onClick = { onEditClick(details.id) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryCyan)
+                                Icon(Icons.Default.Edit, contentDescription = "Editar", tint = MaterialTheme.colorScheme.secondary)
                             }
                             IconButton(onClick = { viewModel.deleteCustomProduct() }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         bottomBar = {
             if (uiState is ProductDetailsUiState.Success) {
                 val details = (uiState as ProductDetailsUiState.Success).details
-                BottomAppBar(
-                    containerColor = Color.White,
-                    tonalElevation = 8.dp,
-                    contentPadding = PaddingValues(16.dp)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 8.dp
                 ) {
-                    Button(
-                        onClick = {
-                            onAddToCart(
-                                Product(
-                                    id = details.id,
-                                    upc = details.upc,
-                                    nombre = details.name,
-                                    categoria = details.category,
-                                    imageUrl = details.imageUrl,
-                                    brands = details.brand
-                                )
+                    Box(modifier = Modifier.padding(16.dp)) {
+                        Button(
+                            onClick = {
+                                viewModel.onAddProductClicked(details)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
                             )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryCyan)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Add to Cart", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Agregar a la Lista", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
                     }
                 }
             }
         }
     ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(innerPadding).fillMaxSize(),
-            color = AppBackground
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
             when (val state = uiState) {
                 is ProductDetailsUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = PrimaryCyan)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                     }
                 }
                 is ProductDetailsUiState.Success -> {
@@ -138,6 +133,25 @@ fun ProductDetailsScreen(
                         Text(text = state.message, color = MaterialTheme.colorScheme.error)
                     }
                 }
+            }
+
+            AppToast(
+                message = toastMessage,
+                onDismiss = viewModel::clearToast,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
+
+            targetProduct?.let { product ->
+                SelectListDialog(
+                    productName = product.nombre,
+                    lists = availableLists,
+                    onListsSelected = { selectedLists ->
+                        viewModel.addProductToMultipleLists(product, selectedLists)
+                    },
+                    onDismiss = viewModel::dismissSelectListDialog
+                )
             }
         }
     }
@@ -152,8 +166,7 @@ private fun ProductDetailsContent(
     val candidateUrls = remember(upc, details.imageUrl, details.name) {
         val list = mutableListOf<String>()
         if (details.imageUrl.isNotBlank()) list.add(details.imageUrl)
-        
-        // Bing es el respaldo más rápido
+
         list.add(UsdaImageResolver.getSearchThumbnailUrl(details.brand, details.name))
 
         if (upc.isNotEmpty()) {
@@ -162,29 +175,31 @@ private fun ProductDetailsContent(
         }
         list.distinct().filter { it.isNotBlank() }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        // Aesthetic Image Header
+        // Image Header Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 val cacheKey = remember(details.upc, details.id) { details.upc.ifBlank { details.id } }
-                
+
                 ProductImage(
                     candidateUrls = candidateUrls,
                     productName = details.name,
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     contentScale = ContentScale.Fit,
                     onUrlVerified = { verifiedUrl ->
                         viewModel.imageCache.saveVerifiedUrl(cacheKey, verifiedUrl)
@@ -199,34 +214,36 @@ private fun ProductDetailsContent(
         Text(
             text = details.name,
             style = MaterialTheme.typography.headlineSmall,
-            color = TextDark,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.ExtraBold,
             lineHeight = 32.sp
         )
-        
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = details.brand,
+                text = details.brand.ifBlank { "Generico" },
                 style = MaterialTheme.typography.titleMedium,
-                color = SecondaryTeal,
+                color = MaterialTheme.colorScheme.secondary,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = " • ",
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = details.category,
+                text = details.category.ifBlank { "General" },
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Info Sections
         InfoSection(
-            title = "Description & Ingredients",
+            title = "Ingredientes y Descripción",
             icon = Icons.Default.List,
             content = details.ingredients
         )
@@ -234,27 +251,30 @@ private fun ProductDetailsContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Nutrition Card
-        Text(
-            text = "Nutritional Information",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-        
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                details.nutrients.forEach { (name, value) ->
-                    NutrientRow(name = name, value = value)
+        if (details.nutrients.isNotEmpty()) {
+            Text(
+                text = "Información Nutricional",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    details.nutrients.forEach { (name, value) ->
+                        NutrientRow(name = name, value = value)
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
-        
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -262,11 +282,12 @@ private fun ProductDetailsContent(
 fun InfoSection(title: String, icon: ImageVector, content: String) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = PrimaryCyan)
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.width(8.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -274,7 +295,7 @@ fun InfoSection(title: String, icon: ImageVector, content: String) {
         Text(
             text = content,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextDark.copy(alpha = 0.8f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 22.sp
         )
     }
@@ -289,12 +310,12 @@ fun NutrientRow(name: String, value: Double) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = name, color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
+        Text(text = name, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         Text(
-            text = if (name == "Calories") value.toInt().toString() else "${value}g",
+            text = if (name.contains("Calor", ignoreCase = true) || name == "Calories") value.toInt().toString() else "${value}g",
             fontWeight = FontWeight.Bold,
-            color = TextDark
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
-    HorizontalDivider(color = Color(0xFFF0F0F0))
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }

@@ -49,24 +49,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val firestore = FirebaseFirestore.getInstance()
 
-        firestore.collection("users").document(uid).get().addOnSuccessListener { userSnapshot ->
-            val householdId = userSnapshot.getString("householdId") ?: "familia_valdes"
-
-            val userRef = firestore.collection("households").document(householdId)
-                .collection("users").document(uid)
-
-            userRef.update("deviceToken", token)
-                .addOnSuccessListener {
-                    Log.d("FCMService", "✅ Token updated in Firestore for household $householdId")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("FCMService", "⚠️ Update failed, creating or merging document")
-                    userRef.set(mapOf(
-                        "deviceToken" to token,
-                        "lastSeen" to System.currentTimeMillis()
-                    ), SetOptions.merge())
-                }
-        }
+        val userRef = firestore.collection("users").document(uid)
+        userRef.set(mapOf("fcmToken" to token, "lastSeen" to System.currentTimeMillis()), SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("FCMService", "✅ Token updated in Firestore for user $uid")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FCMService", "❌ Failed to update token in Firestore", e)
+            }
     }
 
     private fun sendNotification(title: String, messageBody: String) {
