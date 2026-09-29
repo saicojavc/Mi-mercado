@@ -105,24 +105,24 @@ fun ShoppingListDetailScreen(
         val query = uiState.catalogSearchQuery.trim()
         val baseList = uiState.favorites
 
-        val queryFiltered = if (query.isNotBlank()) {
+        if (query.isNotBlank()) {
             baseList.filter { fav ->
                 fav.nombre.contains(query, ignoreCase = true) ||
                         fav.brands.contains(query, ignoreCase = true) ||
                         fav.categoria.contains(query, ignoreCase = true)
             }
         } else {
-            baseList
-        }
-
-        val selectedCat = uiState.selectedFavoriteCategory
-        if (selectedCat == null || selectedCat == "Todos") {
-            queryFiltered
-        } else {
-            queryFiltered.filter { fav ->
-                val normalized = CategoryMapper.getNormalizedCategory(fav.categoria, fav.nombre)
-                normalized.contains(selectedCat, ignoreCase = true) ||
-                        fav.categoria.contains(selectedCat, ignoreCase = true)
+            val selectedCat = uiState.selectedFavoriteCategory
+            if (selectedCat == null) {
+                emptyList() // COLLAPSED by default
+            } else if (selectedCat == "Todos") {
+                baseList
+            } else {
+                baseList.filter { fav ->
+                    val normalized = CategoryMapper.getNormalizedCategory(fav.categoria, fav.nombre)
+                    normalized.contains(selectedCat, ignoreCase = true) ||
+                            fav.categoria.contains(selectedCat, ignoreCase = true)
+                }
             }
         }
     }
@@ -467,7 +467,35 @@ fun ShoppingListDetailScreen(
                         }
 
                         val favCategory = uiState.selectedFavoriteCategory
-                        if (filteredFavorites.isEmpty()) {
+                        if (uiState.catalogSearchQuery.isBlank() && favCategory == null) {
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.TouchApp,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(Modifier.width(10.dp))
+                                        Text(
+                                            "Toca una categoría arriba para desplegar tus productos favoritos.",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        } else if (filteredFavorites.isEmpty()) {
                             item {
                                 Box(
                                     modifier = Modifier
@@ -480,8 +508,6 @@ fun ShoppingListDetailScreen(
                                             "No se encontraron favoritos para '${uiState.catalogSearchQuery}'"
                                         else if (uiState.favorites.isEmpty())
                                             "Aún no tienes productos en tus Favoritos. Explora el Catálogo para guardar tus preferidos."
-                                        else if (favCategory == null)
-                                            "Toca una categoría arriba para ver tus productos favoritos."
                                         else
                                             "No tienes productos favoritos en la categoría $favCategory.",
                                         fontSize = 14.sp,
@@ -632,7 +658,7 @@ fun ShoppingListDetailScreen(
                                             )
                                             Spacer(Modifier.width(10.dp))
                                             Text(
-                                                "Escribe arriba o toca una categoría para ver productos.",
+                                                "Toca una categoría arriba para desplegar productos del catálogo.",
                                                 fontSize = 13.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )

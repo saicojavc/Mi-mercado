@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.saico.mimercado.core.model.ThemeMode
 import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
@@ -91,7 +93,15 @@ class MainActivity : ComponentActivity() {
         checkGooglePlayServices()
 
         setContent {
-            MiMercadoTheme(darkTheme = viewModel.isDarkMode.value) {
+            val themeMode by viewModel.themeMode.collectAsState()
+            val isSystemDark = isSystemInDarkTheme()
+            val useDarkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemDark
+            }
+
+            MiMercadoTheme(darkTheme = useDarkTheme) {
                 val navController = rememberNavController()
                 NavigatorHandler(navigator = navigator, navController = navController)
 

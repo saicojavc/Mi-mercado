@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.saico.mimercado.core.model.ThemeMode
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.util.AvatarUtils
 
@@ -199,8 +200,13 @@ fun ProfileScreen(
                                         Text("Tema Oscuro", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                                     }
                                     Switch(
-                                        checked = uiState.isDarkMode,
-                                        onCheckedChange = { viewModel.toggleDarkMode() }
+                                        checked = uiState.themeMode == ThemeMode.DARK,
+                                        onCheckedChange = { checked ->
+                                            viewModel.onThemeModeChanged(
+                                                if (checked) ThemeMode.DARK
+                                                else ThemeMode.LIGHT
+                                            )
+                                        }
                                     )
                                 }
 

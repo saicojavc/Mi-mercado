@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.saico.mimercado.core.domain.repository.AuthRepository
 import com.saico.mimercado.core.domain.usecase.auth.AuthUseCases
 import com.saico.mimercado.core.domain.usecase.household.HouseholdUseCases
+import com.saico.mimercado.core.domain.usecase.theme.ObserveThemeModeUseCase
+import com.saico.mimercado.core.domain.usecase.theme.SetThemeModeUseCase
 import com.saico.mimercado.core.model.Household
 import com.saico.mimercado.core.model.HouseholdMember
 import com.saico.mimercado.core.model.MemberRole
+import com.saico.mimercado.core.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -18,7 +21,7 @@ data class ProfileUiState(
     val userDisplayName: String = "Usuario",
     val userEmail: String = "",
     val userAvatar: String? = null,
-    val isDarkMode: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.DARK,
     val household: Household? = null,
     val members: List<HouseholdMember> = emptyList(),
     val isCurrentUserAdult: Boolean = false,
@@ -36,7 +39,9 @@ data class ProfileUiState(
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val authUseCases: AuthUseCases,
-    private val householdUseCases: HouseholdUseCases
+    private val householdUseCases: HouseholdUseCases,
+    private val observeThemeModeUseCase: ObserveThemeModeUseCase,
+    private val setThemeModeUseCase: SetThemeModeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -47,6 +52,13 @@ class ProfileViewModel @Inject constructor(
 
     init {
         loadProfileData()
+        observeThemeMode()
+    }
+
+    private fun observeThemeMode() {
+        observeThemeModeUseCase().onEach { mode ->
+            _uiState.update { it.copy(themeMode = mode) }
+        }.launchIn(viewModelScope)
     }
 
     private fun loadProfileData() {
@@ -69,6 +81,7 @@ class ProfileViewModel @Inject constructor(
                             userDisplayName = profile?.displayName ?: "Usuario",
                             userEmail = profile?.email ?: "",
                             currentUserUid = currentUserUid,
+                            themeMode = _uiState.value.themeMode,
                             isLoading = false
                         )
                     )
@@ -87,6 +100,7 @@ class ProfileViewModel @Inject constructor(
                             members = members,
                             isCurrentUserAdult = isAdult,
                             currentUserUid = currentUserUid,
+                            themeMode = _uiState.value.themeMode,
                             isLoading = false
                         )
                     }
@@ -101,8 +115,10 @@ class ProfileViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun toggleDarkMode() {
-        _uiState.update { it.copy(isDarkMode = !it.isDarkMode) }
+    fun onThemeModeChanged(mode: ThemeMode) {
+        viewModelScope.launch {
+            setThemeModeUseCase(mode)
+        }
     }
 
     fun createNewHousehold(name: String) {
