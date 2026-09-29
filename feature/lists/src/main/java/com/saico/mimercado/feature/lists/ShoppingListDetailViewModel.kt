@@ -14,6 +14,8 @@ import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ShoppingList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,6 +52,9 @@ data class ShoppingListDetailUiState(
     val selectedFavoriteCategory: String? = null,
     val selectedCatalogCategory: String? = null,
     val categoryProductsMap: Map<String, List<Product>> = emptyMap(),
+    val catalogSearchQuery: String = "",
+    val searchProductsResults: List<Product> = emptyList(),
+    val isSearchingCatalog: Boolean = false,
     val isLoadingCategoryProducts: Boolean = false,
     val quickAddText: String = "",
     val toastMessage: String? = null,
@@ -75,6 +80,8 @@ class ShoppingListDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ShoppingListDetailUiState(isLoading = true))
     val uiState: StateFlow<ShoppingListDetailUiState> = _uiState.asStateFlow()
+
+    private var searchJob: Job? = null
 
     init {
         loadListDetails()
@@ -109,6 +116,9 @@ class ShoppingListDetailViewModel @Inject constructor(
                                     selectedFavoriteCategory = _uiState.value.selectedFavoriteCategory,
                                     selectedCatalogCategory = _uiState.value.selectedCatalogCategory,
                                     categoryProductsMap = _uiState.value.categoryProductsMap,
+                                    catalogSearchQuery = _uiState.value.catalogSearchQuery,
+                                    searchProductsResults = _uiState.value.searchProductsResults,
+                                    isSearchingCatalog = _uiState.value.isSearchingCatalog,
                                     isLoadingCategoryProducts = _uiState.value.isLoadingCategoryProducts,
                                     quickAddText = _uiState.value.quickAddText,
                                     toastMessage = _uiState.value.toastMessage,
@@ -128,6 +138,27 @@ class ShoppingListDetailViewModel @Inject constructor(
                 if (state.activeTab == ExplorationTab.CATALOG && selectedCat != null && !state.categoryProductsMap.containsKey(selectedCat)) {
                     loadCategoryProducts(selectedCat)
                 }
+            }
+        }
+    }
+
+    fun onCatalogSearchQueryChanged(query: String) {
+        _uiState.update { it.copy(catalogSearchQuery = query) }
+        searchJob?.cancel()
+
+        if (query.isBlank()) {
+            _uiState.update { it.copy(searchProductsResults = emptyList(), isSearchingCatalog = false) }
+            return
+        }
+
+        searchJob = viewModelScope.launch {
+            delay(300)
+            _uiState.update { it.copy(isSearchingCatalog = true) }
+            val result = productsUseCases.getProducts(category = null, searchQuery = query, store = null, page = 1)
+            result.onSuccess { products ->
+                _uiState.update { it.copy(searchProductsResults = products, isSearchingCatalog = false) }
+            }.onFailure {
+                _uiState.update { it.copy(searchProductsResults = emptyList(), isSearchingCatalog = false) }
             }
         }
     }

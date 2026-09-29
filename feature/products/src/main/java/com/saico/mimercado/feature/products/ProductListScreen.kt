@@ -33,10 +33,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.AppToast
+import com.saico.mimercado.core.ui.components.BarcodeScannerView
 import com.saico.mimercado.core.ui.components.CategoryFilter
 import com.saico.mimercado.core.ui.components.ProductCard
 import com.saico.mimercado.core.ui.components.SelectListDialog
-import com.saico.mimercado.feature.products.components.BarcodeScannerView
 import com.saico.mimercado.feature.products.model.ListMode
 import kotlinx.coroutines.flow.SharedFlow
 

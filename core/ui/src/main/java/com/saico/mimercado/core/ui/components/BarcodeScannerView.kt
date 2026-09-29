@@ -1,4 +1,4 @@
-package com.saico.mimercado.feature.products.components
+package com.saico.mimercado.core.ui.components
 
 import android.util.Log
 import android.view.ViewGroup

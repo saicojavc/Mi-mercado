@@ -11,7 +11,6 @@ import com.saico.mimercado.core.ui.navigation.routes.lists.ShoppingListsRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.CreateCustomProductRoute
 import com.saico.mimercado.core.ui.navigation.routes.products.ProductDetailsRoute
 import com.saico.mimercado.core.ui.navigation.routes.profile.ProfileRoute
-import com.saico.mimercado.core.ui.navigation.routes.search.SearchRoute
 import com.saico.mimercado.feature.lists.CreateListScreen
 import com.saico.mimercado.feature.lists.CreateListViewModel
 import com.saico.mimercado.feature.lists.ShoppingListDetailScreen
@@ -43,8 +42,6 @@ fun NavGraphBuilder.listsGraph(
         ShoppingListDetailScreen(
             viewModel = viewModel,
             onBackClick = { navigator.navigate(NavigationCommand.PopBackstack) },
-            onSearchClick = { navigator.navigate(NavigationCommand.NavigateTo(SearchRoute)) },
-            onScanBarcodeClick = { navigator.navigate(NavigationCommand.NavigateTo(SearchRoute)) },
             onProductClick = { product ->
                 navigator.navigate(NavigationCommand.NavigateTo(ProductDetailsRoute(product.id, product.isCustom)))
             },
