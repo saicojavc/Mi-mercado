@@ -1,5 +1,100 @@
 <resources>
-    <string name="app_name">Mi Mercado Core UI</string>
+    <string name="app_name">Mi Mercado</string>
+    <string name="app_subtitle">Tu despensa inteligente y compartida</string>
     <string name="add_to_cart">Añadir al carrito</string>
+    <string name="continue_with_google">Continuar con Google</string>
     <string name="default_web_client_id">468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com</string>
+
+    <!-- Navigation Bar -->
+    <string name="nav_my_lists">Mis Listas</string>
+    <string name="nav_catalog">Catálogo</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- Categories -->
+    <string name="category_all">Todos</string>
+    <string name="category_dairy">Lácteos</string>
+    <string name="category_bakery">Panadería</string>
+    <string name="category_meat">Carnes</string>
+    <string name="category_produce">Frutas y verduras</string>
+    <string name="category_pantry">Despensa</string>
+    <string name="category_beverages">Bebidas</string>
+    <string name="category_cleaning">Limpieza</string>
+
+    <!-- Shopping Lists & Detail -->
+    <string name="lists_title">Mis Listas</string>
+    <string name="create_list_button">Crear lista</string>
+    <string name="new_list_title">Nueva Lista</string>
+    <string name="list_name_label">Nombre de la lista</string>
+    <string name="new_name_label">Nuevo nombre</string>
+    <string name="list_name_placeholder">Ej. Fiesta de Cumpleaños, Farmacia...</string>
+    <string name="choose_style_label">Elige un estilo:</string>
+    <string name="create_list_confirm">Crear Lista</string>
+    <string name="rename_list_title">Renombrar lista</string>
+    <string name="delete_list_action">Eliminar lista</string>
+    <string name="list_empty_title">Tu lista está vacía</string>
+    <string name="list_empty_subtitle">Escribe abajo o busca en el catálogo para agregar productos.</string>
+    <string name="need_placeholder">Necesito...</string>
+    <string name="quick_add_content_desc">Agregar rápido</string>
+    <string name="add_products_header">Agregar Productos</string>
+    <string name="favorites_tab">Mis Favoritos (%1$d)</string>
+    <string name="catalog_tab">Catálogo</string>
+    <string name="search_catalog_placeholder">Buscar en el catálogo...</string>
+    <string name="tap_category_favorites_hint">Toca una categoría arriba para desplegar tus productos favoritos.</string>
+    <string name="tap_category_catalog_hint">Toca una categoría arriba para desplegar productos del catálogo.</string>
+    <string name="create_custom_product_button">Crear producto personalizado</string>
+    <string name="items_in_list_count">En tu lista (%1$d)</string>
+    <string name="products_count">%1$d productos</string>
+    <string name="single_product_count">1 producto</string>
+    <string name="main_badge">Principal</string>
+
+    <!-- Select List Dialog -->
+    <string name="select_lists_title">Seleccionar listas</string>
+    <string name="add_to_lists_subtitle">Agregar \'%1$s\' a:</string>
+    <string name="add_lists_confirm">Agregar (%1$d)</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="save_button">Guardar</string>
+
+    <!-- Catalog & Product Details -->
+    <string name="catalog_header">Catálogo de Productos</string>
+    <string name="search_products_placeholder">Buscar productos o código de barras...</string>
+    <string name="no_products_found">No se encontraron productos.</string>
+    <string name="add_product_manually">Añadir producto manualmente</string>
+    <string name="product_details_title">Detalles del Producto</string>
+    <string name="add_to_list_button">Agregar a la Lista</string>
+    <string name="ingredients_description_header">Ingredientes y Descripción</string>
+    <string name="nutritional_info_header">Información Nutricional</string>
+    <string name="new_custom_product_title">Nuevo Producto Personalizado</string>
+    <string name="edit_product_title">Editar Producto</string>
+    <string name="product_name_label">Nombre del producto</string>
+    <string name="product_name_placeholder">Ej: Leche de Almendras especial</string>
+    <string name="category_label">Categoría</string>
+    <string name="image_suggestions_title">Sugerencias de Imagen</string>
+    <string name="search_photos_button">Buscar fotos</string>
+    <string name="save_changes_button">Guardar Cambios</string>
+
+    <!-- Profile & Household -->
+    <string name="my_profile_title">Mi Perfil</string>
+    <string name="hello_user">¡Hola, %1$s!</string>
+    <string name="dark_mode_title">Tema Oscuro</string>
+    <string name="sign_out_title">Cerrar Sesión</string>
+    <string name="your_family_header">TU FAMILIA</string>
+    <string name="change_family_name_button">Cambiar nombre de la familia</string>
+    <string name="rename_family_dialog_title">Renombrar Familia</string>
+    <string name="new_family_name_hint">Escribe el nuevo nombre para tu hogar:</string>
+    <string name="family_access_code_label">Código de acceso familiar:</string>
+    <string name="copy_button">Copiar</string>
+    <string name="share_button">Compartir</string>
+    <string name="regenerate_code_button">Regenerar código</string>
+    <string name="no_family_title">Sin Familia Asignada</string>
+    <string name="no_family_subtitle">Crea una familia para compartir y sincronizar listas con los tuyos.</string>
+    <string name="family_name_label">Nombre de la familia</string>
+    <string name="family_name_placeholder">Ej: Los García</string>
+    <string name="create_my_family_button">Crear mi Familia</string>
+    <string name="join_other_family_title">Unirse a otra familia</string>
+    <string name="enter_6_char_code">Ingresa el código de 6 caracteres:</string>
+    <string name="family_members_header">Integrantes de la familia</string>
+    <string name="choose_your_avatar_title">Elige tu Avatar</string>
+    <string name="role_adult">Adulto (Comprador)</string>
+    <string name="role_child">Menor (Sugeridor)</string>
+    <string name="custom_badge">Personalizado</string>
 </resources>

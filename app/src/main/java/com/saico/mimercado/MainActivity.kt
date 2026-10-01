@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -43,6 +44,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.saico.mimercado.core.model.ThemeMode
 import com.saico.mimercado.core.network.fcm.FCMRegistrationManager
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.navigation.NavigationCommand
 import com.saico.mimercado.core.ui.navigation.Navigator
 import com.saico.mimercado.core.ui.navigation.NavigatorHandler
@@ -194,8 +196,8 @@ private fun MainContainer(
                                 onClick = {
                                     navigator.navigate(NavigationCommand.NavigateTo(ShoppingListsRoute))
                                 },
-                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Listas") },
-                                label = { Text("Mis Listas", fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
+                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
+                                label = { Text(stringResource(R.string.nav_my_lists), fontWeight = if (isListsSelected) FontWeight.Bold else FontWeight.Normal) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = MaterialTheme.colorScheme.secondary,
                                     selectedTextColor = MaterialTheme.colorScheme.secondary,
@@ -208,8 +210,8 @@ private fun MainContainer(
                                 onClick = {
                                     navigator.navigate(NavigationCommand.NavigateTo(ProductsRoute))
                                 },
-                                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Catálogo") },
-                                label = { Text("Catálogo", fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
+                                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
+                                label = { Text(stringResource(R.string.nav_catalog), fontWeight = if (isCatalogSelected) FontWeight.Bold else FontWeight.Normal) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = MaterialTheme.colorScheme.secondary,
                                     selectedTextColor = MaterialTheme.colorScheme.secondary,
@@ -222,8 +224,8 @@ private fun MainContainer(
                                 onClick = {
                                     navigator.navigate(NavigationCommand.NavigateTo(ProfileRoute))
                                 },
-                                icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") },
-                                label = { Text("Perfil", fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Normal) },
+                                icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+                                label = { Text(stringResource(R.string.nav_profile), fontWeight = if (isProfileSelected) FontWeight.Bold else FontWeight.Normal) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = MaterialTheme.colorScheme.secondary,
                                     selectedTextColor = MaterialTheme.colorScheme.secondary,

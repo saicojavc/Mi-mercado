@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +32,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.saico.mimercado.core.model.Product
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.BarcodeScannerView
@@ -99,7 +101,7 @@ fun ProductListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Catálogo de Productos",
+                    text = stringResource(R.string.catalog_header),
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 22.sp,
                     color = MaterialTheme.colorScheme.onBackground
@@ -108,7 +110,7 @@ fun ProductListScreen(
                 IconButton(onClick = onCreateCustomProductClick) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Crear producto personalizado",
+                        contentDescription = stringResource(R.string.create_custom_product_button),
                         tint = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -125,7 +127,7 @@ fun ProductListScreen(
                     value = uiState.searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Buscar productos o código de barras...") },
+                    placeholder = { Text(stringResource(R.string.search_products_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = {
@@ -137,7 +139,7 @@ fun ProductListScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.QrCodeScanner,
-                                contentDescription = "Escanear Código",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -173,7 +175,7 @@ fun ProductListScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "No se encontraron productos.",
+                            text = stringResource(R.string.no_products_found),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 16.sp
                         )
@@ -184,7 +186,7 @@ fun ProductListScreen(
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Añadir producto manualmente")
+                            Text(androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.add_product_manually))
                         }
                     }
                 } else {

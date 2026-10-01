@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.model.ThemeMode
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.util.AvatarUtils
 
@@ -58,15 +60,15 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { showRenameFamilyDialog = false },
             title = {
-                Text("Renombrar Familia", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(R.string.rename_family_dialog_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Escribe el nuevo nombre para tu hogar:", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.new_family_name_hint), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     OutlinedTextField(
                         value = familyNameEditInput,
                         onValueChange = { familyNameEditInput = it },
-                        label = { Text("Nombre de la familia", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        label = { Text(stringResource(R.string.family_name_label), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -94,12 +96,12 @@ fun ProfileScreen(
                         contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
-                    Text("Guardar Cambios", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save_changes_button), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRenameFamilyDialog = false }) {
-                    Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.cancel_button), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -110,7 +112,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Perfil", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp) },
+                title = { Text(stringResource(R.string.my_profile_title), fontWeight = FontWeight.ExtraBold, fontSize = 24.sp) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -164,7 +166,7 @@ fun ProfileScreen(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "¡Hola, ${uiState.userDisplayName}!",
+                                        text = stringResource(R.string.hello_user, uiState.userDisplayName),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -197,7 +199,7 @@ fun ProfileScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Tema Oscuro", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                        Text(stringResource(R.string.dark_mode_title), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                                     }
                                     Switch(
                                         checked = uiState.themeMode == ThemeMode.DARK,
@@ -222,7 +224,7 @@ fun ProfileScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Cerrar Sesión", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
+                                        Text(stringResource(R.string.sign_out_title), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
                                     }
                                 }
                             }
@@ -240,19 +242,19 @@ fun ProfileScreen(
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                             ) {
                                 Column(Modifier.padding(20.dp)) {
-                                    Text("Sin Familia Asignada", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                    Text(stringResource(R.string.no_family_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                                     Spacer(Modifier.height(8.dp))
-                                    Text("Crea una familia para compartir y sincronizar listas con los tuyos.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                                    Text(stringResource(R.string.no_family_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
 
                                     Spacer(Modifier.height(16.dp))
 
                                     OutlinedTextField(
                                         value = familyNameInput,
                                         onValueChange = { familyNameInput = it },
-                                        label = { Text("Nombre de la familia") },
+                                        label = { Text(stringResource(R.string.family_name_label)) },
                                         modifier = Modifier.fillMaxWidth(),
                                         singleLine = true,
-                                        placeholder = { Text("Ej: Los García") }
+                                        placeholder = { Text(stringResource(R.string.family_name_placeholder)) }
                                     )
 
                                     Spacer(Modifier.height(12.dp))
@@ -265,7 +267,7 @@ fun ProfileScreen(
                                     ) {
                                         Icon(Icons.Default.AddHome, contentDescription = null)
                                         Spacer(Modifier.width(8.dp))
-                                        Text("Crear mi Familia")
+                                        Text(stringResource(R.string.create_my_family_button))
                                     }
                                 }
                             }
@@ -283,7 +285,7 @@ fun ProfileScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         val displayName = remember(household.name) {
-                                            if (household.name.startsWith("Hogar", ignoreCase = true) || household.name.startsWith("Familia", ignoreCase = true)) {
+                                            if (household.name.startsWith("Hogar", ignoreCase = true) || household.name.startsWith("Familia", ignoreCase = true) || household.name.startsWith("Home", ignoreCase = true)) {
                                                 household.name
                                             } else {
                                                 "Hogar de ${household.name}"
@@ -291,7 +293,7 @@ fun ProfileScreen(
                                         }
 
                                         Text(
-                                            text = "TU FAMILIA",
+                                            text = stringResource(R.string.your_family_header),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = MaterialTheme.colorScheme.secondary,
@@ -332,7 +334,7 @@ fun ProfileScreen(
                                             )
                                             Spacer(Modifier.width(8.dp))
                                             Text(
-                                                text = "Cambiar nombre de la familia",
+                                                text = stringResource(R.string.change_family_name_button),
                                                 fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.secondary
@@ -343,7 +345,7 @@ fun ProfileScreen(
                                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                                         Spacer(Modifier.height(12.dp))
 
-                                        Text("Código de acceso familiar:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                                        Text(stringResource(R.string.family_access_code_label), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
 
                                         Spacer(Modifier.height(8.dp))
 
@@ -371,7 +373,7 @@ fun ProfileScreen(
                                             ) {
                                                 Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                                                 Spacer(Modifier.width(6.dp))
-                                                Text("Copiar")
+                                                Text(stringResource(R.string.copy_button))
                                             }
 
                                             Button(
@@ -388,7 +390,7 @@ fun ProfileScreen(
                                             ) {
                                                 Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                                                 Spacer(Modifier.width(6.dp))
-                                                Text("Compartir")
+                                                Text(stringResource(R.string.share_button))
                                             }
                                         }
 
@@ -400,7 +402,7 @@ fun ProfileScreen(
                                                 } else {
                                                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                                                     Spacer(Modifier.width(6.dp))
-                                                    Text("Regenerar código", fontSize = 13.sp)
+                                                    Text(stringResource(R.string.regenerate_code_button), fontSize = 13.sp)
                                                 }
                                             }
                                         }
@@ -418,9 +420,9 @@ fun ProfileScreen(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Column(Modifier.padding(16.dp)) {
-                                Text("Unirse a otra familia", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(stringResource(R.string.join_other_family_title), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 Spacer(Modifier.height(4.dp))
-                                Text("Ingresa el código de 6 caracteres:", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                                Text(stringResource(R.string.enter_6_char_code), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
 
                                 Spacer(Modifier.height(12.dp))
 
@@ -457,7 +459,7 @@ fun ProfileScreen(
                     if (hasHousehold) {
                         item {
                             Text(
-                                "Integrantes de la familia",
+                                stringResource(R.string.family_members_header),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 modifier = Modifier.padding(top = 8.dp)

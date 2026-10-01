@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.saico.mimercado.core.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +42,11 @@ fun CreateCustomProductScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(if (uiState.isEditing) "Editar Producto" else "Nuevo Producto Personalizado", fontWeight = FontWeight.Bold) },
+                title = { Text(if (uiState.isEditing) stringResource(R.string.edit_product_title) else stringResource(
+                    R.string.new_custom_product_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -62,8 +65,8 @@ fun CreateCustomProductScreen(
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = viewModel::onNameChanged,
-                label = { Text("Nombre del producto") },
-                placeholder = { Text("Ej: Leche de Almendras especial") },
+                label = { Text(stringResource(R.string.product_name_label)) },
+                placeholder = { Text(stringResource(R.string.product_name_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -78,7 +81,7 @@ fun CreateCustomProductScreen(
                 onCategorySelected = viewModel::onCategoryChanged
             )
 
-            Text("Sugerencias de Imagen", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Text(androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.image_suggestions_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -96,7 +99,7 @@ fun CreateCustomProductScreen(
                 ) {
                     Icon(Icons.Default.ImageSearch, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Buscar fotos", fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.search_photos_button), fontWeight = FontWeight.Bold)
                 }
 
                 if (uiState.isSearchingImages) {
@@ -165,7 +168,8 @@ fun CreateCustomProductScreen(
                 if (uiState.isSaving) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                 } else {
-                    Text(if (uiState.isEditing) "Guardar Cambios" else "Crear Producto", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(if (uiState.isEditing) stringResource(R.string.save_changes_button) else stringResource(
+                        R.string.create_list_confirm), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
 
@@ -193,7 +197,7 @@ fun CategoryDropdown(
             value = selectedCategory,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Categoría") },
+            label = { Text(androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.category_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.menuAnchor().fillMaxWidth(),

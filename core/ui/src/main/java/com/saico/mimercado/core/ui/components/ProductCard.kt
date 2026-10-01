@@ -134,7 +134,7 @@ fun ProductCard(
                                 modifier = Modifier.padding(start = 2.dp)
                             ) {
                                 Text(
-                                    text = "Personalizado",
+                                    text = stringResource(R.string.custom_badge),
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onTertiary,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

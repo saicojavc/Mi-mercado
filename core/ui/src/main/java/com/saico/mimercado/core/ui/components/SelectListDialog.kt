@@ -17,11 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.model.ShoppingListSummary
 import com.saico.mimercado.core.model.ShoppingListType
+import com.saico.mimercado.core.ui.R
 
 @Composable
 fun SelectListDialog(
@@ -43,14 +45,14 @@ fun SelectListDialog(
         title = {
             Column {
                 Text(
-                    text = "Seleccionar listas",
+                    text = stringResource(R.string.select_lists_title),
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (productName.isNotBlank()) {
                     Text(
-                        text = "Agregar '$productName' a:",
+                        text = stringResource(R.string.add_to_lists_subtitle, productName),
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
@@ -93,12 +95,12 @@ fun SelectListDialog(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("Agregar (${selectedIds.size})", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.add_lists_confirm, selectedIds.size), fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.cancel_button), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,
@@ -178,7 +180,7 @@ fun SelectListRow(
                             color = MaterialTheme.colorScheme.secondary
                         ) {
                             Text(
-                                "Principal",
+                                stringResource(R.string.main_badge),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black,
@@ -188,7 +190,7 @@ fun SelectListRow(
                     }
                 }
                 Text(
-                    text = "${summary.itemCount} productos",
+                    text = stringResource(R.string.products_count, summary.itemCount),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

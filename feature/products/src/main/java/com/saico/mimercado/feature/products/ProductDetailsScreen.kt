@@ -20,12 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.common.UsdaImageResolver
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ProductDetails
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.ProductImage
 import com.saico.mimercado.core.ui.components.SelectListDialog
@@ -49,10 +51,10 @@ fun ProductDetailsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Detalles del Producto", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.product_details_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 actions = {
@@ -107,7 +109,7 @@ fun ProductDetailsScreen(
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Agregar a la Lista", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(stringResource(R.string.add_to_list_button), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
                     }
                 }
@@ -243,7 +245,7 @@ private fun ProductDetailsContent(
 
         // Info Sections
         InfoSection(
-            title = "Ingredientes y Descripción",
+            title = stringResource(R.string.ingredients_description_header),
             icon = Icons.Default.List,
             content = details.ingredients
         )
@@ -253,7 +255,7 @@ private fun ProductDetailsContent(
         // Nutrition Card
         if (details.nutrients.isNotEmpty()) {
             Text(
-                text = "Información Nutricional",
+                text = stringResource(R.string.nutritional_info_header),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,

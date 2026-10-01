@@ -26,6 +26,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SignInScreen(
@@ -77,7 +78,7 @@ fun SignInScreen(
             )
             
             Text(
-                text = "Tu despensa inteligente y compartida",
+                text = stringResource(R.string.app_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -174,7 +175,7 @@ fun SignInScreen(
                         }
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            "Continuar con Google",
+                            text = stringResource(R.string.continue_with_google),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )

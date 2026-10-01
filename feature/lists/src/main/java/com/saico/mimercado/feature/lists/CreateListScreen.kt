@@ -18,10 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.model.ListCoverTheme
+import com.saico.mimercado.core.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +42,10 @@ fun CreateListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nueva Lista", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.new_list_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -63,8 +65,8 @@ fun CreateListScreen(
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = viewModel::onNameChanged,
-                label = { Text("Nombre de la lista") },
-                placeholder = { Text("Ej. Fiesta de Cumpleaños, Farmacia...") },
+                label = { Text(stringResource(R.string.list_name_label)) },
+                placeholder = { Text(stringResource(R.string.list_name_placeholder)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -74,7 +76,7 @@ fun CreateListScreen(
                 )
             )
 
-            Text("Elige un estilo:", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(stringResource(R.string.choose_style_label), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
@@ -110,7 +112,7 @@ fun CreateListScreen(
                 if (uiState.isSaving) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                 } else {
-                    Text("Crear Lista", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.create_list_confirm), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
         }

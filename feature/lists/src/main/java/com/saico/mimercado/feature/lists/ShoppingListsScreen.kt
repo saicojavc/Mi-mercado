@@ -19,12 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saico.mimercado.core.model.HouseholdMember
 import com.saico.mimercado.core.model.ShoppingListSummary
 import com.saico.mimercado.core.model.ShoppingListType
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.util.AvatarUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +44,7 @@ fun ShoppingListsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Mis Listas",
+                        stringResource(R.string.lists_title),
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 24.sp,
                         color = MaterialTheme.colorScheme.onBackground
@@ -52,7 +54,7 @@ fun ShoppingListsScreen(
                     IconButton(onClick = onProfileClick) {
                         Icon(
                             Icons.Default.AccountCircle,
-                            contentDescription = "Perfil",
+                            contentDescription = stringResource(R.string.nav_profile),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
                         )
@@ -67,7 +69,7 @@ fun ShoppingListsScreen(
             ExtendedFloatingActionButton(
                 onClick = onCreateListClick,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Crear lista", fontWeight = FontWeight.Bold) },
+                text = { Text(stringResource(R.string.create_list_button), fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 shape = RoundedCornerShape(16.dp)
@@ -171,7 +173,7 @@ fun ShoppingListCard(
                                 )
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    "Principal",
+                                    stringResource(R.string.main_badge),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black
@@ -192,7 +194,7 @@ fun ShoppingListCard(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = if (summary.itemCount == 1) "1 producto" else "${summary.itemCount} productos",
+                        text = if (summary.itemCount == 1) stringResource(R.string.single_product_count) else stringResource(R.string.products_count, summary.itemCount),
                         fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.8f)
                     )

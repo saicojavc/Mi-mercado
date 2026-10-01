@@ -1,0 +1,100 @@
+<resources>
+    <string name="app_name">Mi Mercado</string>
+    <string name="app_subtitle">Your smart shared pantry</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="default_web_client_id">468440647882-mg72hu29e0nva4l21kcfmiabaelba78q.apps.googleusercontent.com</string>
+
+    <!-- Navigation Bar -->
+    <string name="nav_my_lists">My Lists</string>
+    <string name="nav_catalog">Catalog</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Categories -->
+    <string name="category_all">All</string>
+    <string name="category_dairy">Dairy</string>
+    <string name="category_bakery">Bakery</string>
+    <string name="category_meat">Meat</string>
+    <string name="category_produce">Fruits &amp; Vegetables</string>
+    <string name="category_pantry">Pantry</string>
+    <string name="category_beverages">Beverages</string>
+    <string name="category_cleaning">Cleaning</string>
+
+    <!-- Shopping Lists & Detail -->
+    <string name="lists_title">My Lists</string>
+    <string name="create_list_button">Create list</string>
+    <string name="new_list_title">New List</string>
+    <string name="list_name_label">List name</string>
+    <string name="new_name_label">New name</string>
+    <string name="list_name_placeholder">e.g. Birthday Party, Pharmacy...</string>
+    <string name="choose_style_label">Choose a style:</string>
+    <string name="create_list_confirm">Create List</string>
+    <string name="rename_list_title">Rename list</string>
+    <string name="delete_list_action">Delete list</string>
+    <string name="list_empty_title">Your list is empty</string>
+    <string name="list_empty_subtitle">Type below or search in the catalog to add products.</string>
+    <string name="need_placeholder">I need...</string>
+    <string name="quick_add_content_desc">Quick add</string>
+    <string name="add_products_header">Add Products</string>
+    <string name="favorites_tab">My Favorites (%1$d)</string>
+    <string name="catalog_tab">Catalog</string>
+    <string name="search_catalog_placeholder">Search in catalog...</string>
+    <string name="tap_category_favorites_hint">Tap a category above to expand your favorite products.</string>
+    <string name="tap_category_catalog_hint">Tap a category above to expand catalog products.</string>
+    <string name="create_custom_product_button">Create custom product</string>
+    <string name="items_in_list_count">In your list (%1$d)</string>
+    <string name="products_count">%1$d products</string>
+    <string name="single_product_count">1 product</string>
+    <string name="main_badge">Main</string>
+
+    <!-- Select List Dialog -->
+    <string name="select_lists_title">Select lists</string>
+    <string name="add_to_lists_subtitle">Add \'%1$s\' to:</string>
+    <string name="add_lists_confirm">Add (%1$d)</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="save_button">Save</string>
+
+    <!-- Catalog & Product Details -->
+    <string name="catalog_header">Product Catalog</string>
+    <string name="search_products_placeholder">Search products or barcode...</string>
+    <string name="no_products_found">No products found.</string>
+    <string name="add_product_manually">Add product manually</string>
+    <string name="product_details_title">Product Details</string>
+    <string name="add_to_list_button">Add to List</string>
+    <string name="ingredients_description_header">Ingredients and Description</string>
+    <string name="nutritional_info_header">Nutritional Information</string>
+    <string name="new_custom_product_title">New Custom Product</string>
+    <string name="edit_product_title">Edit Product</string>
+    <string name="product_name_label">Product name</string>
+    <string name="product_name_placeholder">e.g. Special Almond Milk</string>
+    <string name="category_label">Category</string>
+    <string name="image_suggestions_title">Image Suggestions</string>
+    <string name="search_photos_button">Search photos</string>
+    <string name="save_changes_button">Save Changes</string>
+
+    <!-- Profile & Household -->
+    <string name="my_profile_title">My Profile</string>
+    <string name="hello_user">Hello, %1$s!</string>
+    <string name="dark_mode_title">Dark Mode</string>
+    <string name="sign_out_title">Sign Out</string>
+    <string name="your_family_header">YOUR FAMILY</string>
+    <string name="change_family_name_button">Change family name</string>
+    <string name="rename_family_dialog_title">Rename Family</string>
+    <string name="new_family_name_hint">Type the new name for your household:</string>
+    <string name="family_access_code_label">Family access code:</string>
+    <string name="copy_button">Copy</string>
+    <string name="share_button">Share</string>
+    <string name="regenerate_code_button">Regenerate code</string>
+    <string name="no_family_title">No Family Assigned</string>
+    <string name="no_family_subtitle">Create a family to share and sync lists with your loved ones.</string>
+    <string name="family_name_label">Family name</string>
+    <string name="family_name_placeholder">e.g. The Smiths</string>
+    <string name="create_my_family_button">Create my Family</string>
+    <string name="join_other_family_title">Join another family</string>
+    <string name="enter_6_char_code">Enter the 6-character code:</string>
+    <string name="family_members_header">Family members</string>
+    <string name="choose_your_avatar_title">Choose your Avatar</string>
+    <string name="role_adult">Adult (Shopper)</string>
+    <string name="role_child">Child (Suggester)</string>
+    <string name="custom_badge">Custom</string>
+</resources>

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +32,7 @@ import com.saico.mimercado.core.common.CategoryMapper
 import com.saico.mimercado.core.model.CartItem
 import com.saico.mimercado.core.model.Product
 import com.saico.mimercado.core.model.ShoppingListType
+import com.saico.mimercado.core.ui.R
 import com.saico.mimercado.core.ui.components.AddToCartButton
 import com.saico.mimercado.core.ui.components.AppToast
 import com.saico.mimercado.core.ui.components.BarcodeScannerView
@@ -130,12 +132,12 @@ fun ShoppingListDetailScreen(
     if (showRenameDialog) {
         AlertDialog(
             onDismissRequest = { showRenameDialog = false },
-            title = { Text("Renombrar lista") },
+            title = { Text(stringResource(R.string.rename_list_title)) },
             text = {
                 OutlinedTextField(
                     value = renameInput,
                     onValueChange = { renameInput = it },
-                    label = { Text("Nuevo nombre") },
+                    label = { Text(stringResource(R.string.new_name_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -148,12 +150,12 @@ fun ShoppingListDetailScreen(
                     },
                     enabled = renameInput.isNotBlank()
                 ) {
-                    Text("Guardar")
+                    Text(stringResource(R.string.save_button))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRenameDialog = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel_button))
                 }
             }
         )
@@ -200,7 +202,7 @@ fun ShoppingListDetailScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Renombrar lista") },
+                                text = { Text(stringResource(R.string.rename_list_title)) },
                                 onClick = {
                                     showMenu = false
                                     renameInput = uiState.list?.name ?: ""
@@ -210,7 +212,7 @@ fun ShoppingListDetailScreen(
                             )
                             if (uiState.list?.type == ShoppingListType.CUSTOM) {
                                 DropdownMenuItem(
-                                    text = { Text("Eliminar lista", color = MaterialTheme.colorScheme.error) },
+                                    text = { Text(stringResource(R.string.delete_list_action), color = MaterialTheme.colorScheme.error) },
                                     onClick = {
                                         showMenu = false
                                         viewModel.deleteList(onDeleted = onBackClick)
