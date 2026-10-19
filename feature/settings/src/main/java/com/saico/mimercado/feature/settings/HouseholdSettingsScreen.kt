@@ -62,7 +62,7 @@ fun HouseholdSettingsScreen(
                 title = { Text("Ajustes del Hogar", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.back_button_desc))
                     }
                 }
             )
@@ -226,7 +226,7 @@ fun HouseholdSettingsScreen(
                                 OutlinedTextField(
                                     value = uiState.joinCodeInput,
                                     onValueChange = { if (it.length <= 6) viewModel.onJoinCodeInputChanged(it) },
-                                    label = { Text("Código") },
+                                    label = { Text(androidx.compose.ui.res.stringResource(com.saico.mimercado.core.ui.R.string.code_label)) },
                                     leadingIcon = { Icon(Icons.Default.QrCode, contentDescription = null) },
                                     singleLine = true,
                                     modifier = Modifier.weight(1f)

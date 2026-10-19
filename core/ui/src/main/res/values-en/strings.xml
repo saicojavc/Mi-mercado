@@ -97,4 +97,16 @@
     <string name="role_adult">Adult (Shopper)</string>
     <string name="role_child">Child (Suggester)</string>
     <string name="custom_badge">Custom</string>
+
+    <!-- Descriptions & Accessibility -->
+    <string name="back_button_desc">Go back</string>
+    <string name="close_button_desc">Close</string>
+    <string name="edit_action_desc">Edit</string>
+    <string name="delete_action_desc">Delete</string>
+    <string name="options_action_desc">Options</string>
+    <string name="favorite_action_desc">Favorite</string>
+    <string name="remove_favorite_desc">Remove from favorites</string>
+    <string name="add_favorite_desc">Save to favorites</string>
+    <string name="code_label">Code</string>
+    <string name="scan_barcode_desc">Scan barcode</string>
 </resources>
